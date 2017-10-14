@@ -86,8 +86,11 @@ export class Processor {
     // ****** create content.html ******
     // there are two different content.html: dir only and file only
     // check directory type
+    this.logger.info('process-dir.listSubPaths.started', {
+      absDir,
+    });
     const subPaths = await mfs.listSubPaths(absDir);
-    this.logger.info('process-dir.listSubPaths', {
+    this.logger.info('process-dir.listSubPaths.completed', {
       absDir, subPaths,
     });
     if (!subPaths.length) {
