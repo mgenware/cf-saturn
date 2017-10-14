@@ -32,6 +32,9 @@ export class Processor {
   }
 
   async startFromFile(file: string) {
+    this.logger.info('process-file', {
+      file,
+    });
     await this.markdownToHTML(file);
 
     const dir = nodepath.dirname(file);
@@ -39,15 +42,27 @@ export class Processor {
   }
 
   private async processDir(dir: string): Promise<PathComponent[]> {
+    this.logger.info('process-dir', {
+      dir,
+    });
     // check whether the dir already exists in cache
     if (dirCache[dir]) {
+      this.logger.info('process-dir.found-in-cache', {
+        dir,
+      });
       return dirCache[dir] as PathComponent[];
     }
 
+    this.logger.info('process-dir.NOT-found-in-cache', {
+      dir,
+    });
     // ****** create path bar ******
     const dirComponent = await this.pathComponentFromDir(dir);
     const reversedComponents = [dirComponent];
     if (await this.isRootDir(dir) === false) {
+      this.logger.info('process-dir.NOT-root', {
+        dir,
+      });
       // not a root directory, find all paths components upward
       const parentDir = nodepath.dirname(dir);
       const parents = await this.processDir(parentDir);
@@ -60,17 +75,27 @@ export class Processor {
     const relDir = nodepath.relative(this.srcDir, dir);
     const destPathBarHtml = nodepath.join(this.destDir, relDir, PATHBAR_HTML);
     const pathBarHtml = this.generatePathBarHtml(reversedComponents.slice().reverse());
+    this.logger.info('process-dir.write-pathbar', {
+      dir, relDir, destPathBarHtml,
+    });
     await mfs.writeFileAsync(destPathBarHtml, pathBarHtml);
 
     // ****** create content.html ******
     // there are two different content.html: dir only and file only
     // check directory type
     const subPaths = await mfs.listSubPaths(dir);
+    this.logger.info('process-dir.listSubPaths', {
+      dir, subPaths,
+    });
     if (!subPaths.length) {
       throw new Error(`No subPaths found in directory "${dir}"`);
     }
+
     const isFile = await mfs.fileExists(subPaths[0]);
     let childComponents: PathComponent[];
+    this.logger.info('process-dir.listSubPaths.isFile', {
+      dir, isFile,
+    });
     if (isFile) {
       childComponents = await this.childComponentsFromDirs(subPaths);
     } else {
@@ -81,6 +106,9 @@ export class Processor {
     const contentHtml = this.generateContentHtml(childComponents);
     // write it to disk
     const contentPath = nodepath.join(this.destDir, relDir, CONTENT_HTML);
+    this.logger.info('process-dir.write-contentHtml', {
+      dir, relDir, contentPath,
+    });
     await mfs.writeFileAsync(contentPath, contentHtml);
 
     // add it to cache, marking as processed
@@ -96,23 +124,32 @@ export class Processor {
 
   /* internal functions for markdown to HTML */
   private async markdownToHTML(file: string) {
-      // read the content of file
-      const content = await mfs.readTextFileAsync(file);
-      // generate markdown
-      const html = MarkdownGenerator.convert(content);
-      // write to file
-      const htmlFile = MarkdownGenerator.rename(nodepath.join(this.destDir, nodepath.relative(this.srcDir, file)));
-      await mfs.writeFileAsync(htmlFile, html);
+    this.logger.info('markdown2html', {
+      file,
+    });
+    // read the content of file
+    const content = await mfs.readTextFileAsync(file);
+    // generate markdown
+    const html = MarkdownGenerator.convert(content);
+    // write to file
+    const htmlFile = MarkdownGenerator.rename(nodepath.join(this.destDir, nodepath.relative(this.srcDir, file)));
+    await mfs.writeFileAsync(htmlFile, html);
   }
 
   /* internal functions for pathBar generation */
   private async pathComponentFromDir(dir: string): Promise<PathComponent> {
+    this.logger.verbose('pathComponentFromDir', {
+      dir,
+    });
     const dirName = nodepath.basename(dir);
     const title = await titleExtractor.fromDir(dir);
     return new PathComponent(dirName, title);
   }
 
   private async pathComponentFromFile(file: string): Promise<PathComponent> {
+    this.logger.verbose('pathComponentFromFile', {
+      file,
+    });
     const name = nodepath.parse(file).name;
     const title = await titleExtractor.fromFile(file);
     return new PathComponent(name, title);
