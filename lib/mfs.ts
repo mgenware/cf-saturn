@@ -1,8 +1,8 @@
-import { promisify } from 'util';
 import * as fs from 'fs';
 import * as nodepath from 'path';
 import { filterAsync } from 'node-filter-async';
 const mkdirp = require('mkdirp-promise');
+const { promisify } = require('bluebird');
 
 const unsafeWriteFileAsync = promisify(fs.writeFile);
 export const readFileAsync = promisify(fs.readFile);
@@ -51,7 +51,7 @@ export async function listSubPaths(
   path: string,
   options?: { encoding: BufferEncoding | null } | BufferEncoding | undefined | null,
 ): Promise<string[]> {
-  return await readdirAsync(path, options).then((files) => {
+  return await readdirAsync(path, options).then((files: string[]) => {
     return files.map((file) => nodepath.join(path, file));
   });
 }
