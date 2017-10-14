@@ -1,0 +1,47 @@
+{
+  "name": "cf-saturn",
+  "version": "0.0.1",
+  "description": "Wiki-like static content generator",
+  "main": "dist/lib/main.js",
+  "types": "dist/lib/main.d.ts",
+  "author": "Mgen (https://www.mgenware.com)",
+  "homepage": "https://github.com/mgenware/cf-saturn",
+  "bugs": "https://github.com/mgenware/cf-saturn/issues",
+  "keywords": [
+    "static site"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mgenware/cf-saturn.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "*",
+    "@types/node": "*",
+    "copyfiles": "^1.2.0",
+    "mocha": "*",
+    "typescript": "*"
+  },
+  "scripts": {
+    "test": "yarn run lint && yarn run compile && yarn run copy && mocha \"dist/test/*.js\"",
+    "dev_test": "mocha \"dist/test/*.js\"",
+    "build": "tsc && yarn test",
+    "compile": "tsc",
+    "prepublishOnly": "yarn run test",
+    "dev": "tsc -w",
+    "lint": "tslint --project .",
+    "copy": "copyfiles \"test/data/**/*.*\" \"dist\""
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "dependencies": {
+    "barbary": "^0.0.3",
+    "escape-html": "^1.0.3",
+    "fx43": "^0.0.7",
+    "node-filter-async": "^0.0.3",
+    "node-rename-path": "^1.0.0",
+    "remarkable": "^1.7.1",
+    "trim": "^0.0.1"
+  }
+}
