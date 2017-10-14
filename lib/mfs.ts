@@ -16,9 +16,11 @@ export async function readTextFileAsync(path: string): Promise<string> {
 export async function writeFileAsync(
   path: string,
   data: any,
-  options: { encoding?: string | null; mode?: number | string; flag?: string; } | string | undefined | null,
+  options?: { encoding?: string | null; mode?: number | string; flag?: string; } | string | undefined | null,
 ): Promise<any> {
-
+  const dirPath = nodepath.dirname(path);
+  await mkdirp(dirPath);
+  await unsafeWriteFileAsync(path, data, options);
 }
 
 export async function statOrNullAsync(path: string): Promise<fs.Stats|null> {
@@ -45,7 +47,14 @@ export async function dirExists(path: string): Promise<boolean> {
   return false;
 }
 
-export const listSubPaths = readdirAsync;
+export async function listSubPaths(
+  path: string,
+  options?: { encoding: BufferEncoding | null } | BufferEncoding | undefined | null,
+): Promise<string[]> {
+  return await readdirAsync(path, options).then((files) => {
+    return files.map((file) => nodepath.join(path, file));
+  });
+}
 
 export async function listSubDirs(dir: string): Promise<string[]> {
   const paths: string[] = await readdirAsync(dir);

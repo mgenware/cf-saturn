@@ -38,17 +38,13 @@ export class Processor {
     await this.markdownToHTML(relFile);
 
     const relDir = nodepath.dirname(relFile);
-    this.logger.info('lire', {
-      relDir,
-    });
-    // await this.processDir(relDir, 1);
+    await this.processDir(relDir, 1);
   }
 
   private async processDir(relDir: string, stackCount: number): Promise<PathComponent[]> {
     if (stackCount >= 100) {
       throw new Error('Potential infinite loop detected.');
     }
-    const absDir = this.makeSrcPath(relDir);
     this.logger.info('process-dir', {
       relDir,
     });
@@ -64,15 +60,16 @@ export class Processor {
       relDir,
     });
     // ****** create path bar ******
+    const absDir = this.makeSrcPath(relDir);
     const dirComponent = await this.pathComponentFromDir(absDir);
     const reversedComponents = [dirComponent];
-    if (await this.isRootDir(absDir) === false) {
+    if (relDir !== '.' && await this.isRootDir(absDir) === false) {
       this.logger.info('process-dir.NOT-root', {
-        absDir,
+        relDir,
       });
       // not a root directory, find all paths components upward
-      const parentAbsDir = nodepath.dirname(absDir);
-      const parents = await this.processDir(parentAbsDir, stackCount + 1);
+      const parentRelDir = nodepath.dirname(relDir);
+      const parents = await this.processDir(parentRelDir, stackCount + 1);
       for (const p of parents) {
         reversedComponents.push(p);
       }
