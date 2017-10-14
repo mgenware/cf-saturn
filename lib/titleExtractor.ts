@@ -4,6 +4,10 @@ import * as nodepath from 'path';
 const DIR_TITLE_FILE = 't.txt';
 
 export default class TitleExtractor {
+  static get TITLE_FILE(): string {
+    return DIR_TITLE_FILE;
+  }
+
   static async fromFile(file: string): Promise<string> {
     const content = await mfs.readTextFileAsync(file);
     return this.fromFileContent(content, file);

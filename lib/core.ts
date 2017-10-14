@@ -94,12 +94,12 @@ export class Processor {
       throw new Error(`No subPaths found in directory "${absDir}"`);
     }
 
-    const isFile = await mfs.fileExists(subPaths[0]);
+    const isLeafDir = await this.isLeafDir(absDir);
     let childComponents: PathComponent[];
     this.logger.info('process-dir.listSubPaths.isFile', {
-      absDir, isFile,
+      absDir, isLeafDir,
     });
-    if (isFile) {
+    if (isLeafDir) {
       childComponents = await this.childComponentsFromDirs(subPaths);
     } else {
       childComponents = await this.childComponentsFromFiles(subPaths);
@@ -199,5 +199,11 @@ export class Processor {
     }
     res += '</ul>';
     return res;
+  }
+
+  private async isLeafDir(absDir: string): Promise<boolean> {
+    // check if this dir is a leaf dir
+    let subdirs = await mfs.listSubDirs(absDir);
+    return subdirs.length === 0;
   }
 }
