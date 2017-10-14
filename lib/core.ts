@@ -38,10 +38,16 @@ export class Processor {
     await this.markdownToHTML(relFile);
 
     const relDir = nodepath.dirname(relFile);
-    await this.processDir(relDir);
+    this.logger.info('lire', {
+      relDir,
+    });
+    // await this.processDir(relDir, 1);
   }
 
-  private async processDir(relDir: string): Promise<PathComponent[]> {
+  private async processDir(relDir: string, stackCount: number): Promise<PathComponent[]> {
+    if (stackCount >= 100) {
+      throw new Error('Potential infinite loop detected.');
+    }
     const absDir = this.makeSrcPath(relDir);
     this.logger.info('process-dir', {
       relDir,
@@ -66,7 +72,7 @@ export class Processor {
       });
       // not a root directory, find all paths components upward
       const parentAbsDir = nodepath.dirname(absDir);
-      const parents = await this.processDir(parentAbsDir);
+      const parents = await this.processDir(parentAbsDir, stackCount + 1);
       for (const p of parents) {
         reversedComponents.push(p);
       }
@@ -122,17 +128,17 @@ export class Processor {
     return await mfs.fileExists(rootFile);
   }
 
-  private makeDestPath(relFile: string): string {
-    return nodepath.join(this.srcDir, relFile);
-  }
-
   private makeSrcPath(relFile: string): string {
     return nodepath.join(this.srcDir, relFile);
+  }
+  
+  private makeDestPath(relFile: string): string {
+    return nodepath.join(this.destDir, relFile);
   }
 
   /* internal functions for markdown to HTML */
   private async markdownToHTML(relFile: string) {
-    this.logger.info('markdown2html', {
+    this.logger.info('markdown2html-start', {
       relFile,
     });
     // read the content of file
@@ -141,6 +147,9 @@ export class Processor {
     const html = MarkdownGenerator.convert(content);
     // write to file
     const htmlFile = MarkdownGenerator.rename(this.makeDestPath(relFile));
+    this.logger.info('markdown2html-write', {
+      htmlFile,
+    });
     await mfs.writeFileAsync(htmlFile, html);
   }
 

@@ -7,6 +7,9 @@ export async function start(srcDir: string, glob: string, destDir: string, cache
   srcDir = nodepath.resolve(srcDir);
   destDir = nodepath.resolve(destDir);
   cacheDir = nodepath.resolve(cacheDir);
+  logger.info('main-started', {
+    srcDir, destDir, cacheDir,
+  });
 
   const processor = new core.Processor(srcDir, destDir, logger);
   // only changed file will be processed
