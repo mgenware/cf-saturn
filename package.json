@@ -39,6 +39,7 @@
     "barbary": "^0.0.3",
     "escape-html": "^1.0.3",
     "fx43": "^0.0.7",
+    "mkdirp-promise": "^5.0.1",
     "node-filter-async": "^0.0.3",
     "node-rename-path": "^1.0.0",
     "remarkable": "^1.7.1",

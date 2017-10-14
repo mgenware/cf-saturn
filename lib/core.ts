@@ -131,7 +131,7 @@ export class Processor {
   private makeSrcPath(relFile: string): string {
     return nodepath.join(this.srcDir, relFile);
   }
-  
+
   private makeDestPath(relFile: string): string {
     return nodepath.join(this.destDir, relFile);
   }

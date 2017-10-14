@@ -2,14 +2,23 @@ import { promisify } from 'util';
 import * as fs from 'fs';
 import * as nodepath from 'path';
 import { filterAsync } from 'node-filter-async';
+const mkdirp = require('mkdirp-promise');
 
-export const writeFileAsync = promisify(fs.writeFile);
+const unsafeWriteFileAsync = promisify(fs.writeFile);
 export const readFileAsync = promisify(fs.readFile);
 export const statAsync = promisify(fs.stat);
 export const readdirAsync = promisify(fs.readdir);
 
 export async function readTextFileAsync(path: string): Promise<string> {
   return await readFileAsync(path, 'utf8');
+}
+
+export async function writeFileAsync(
+  path: string,
+  data: any,
+  options: { encoding?: string | null; mode?: number | string; flag?: string; } | string | undefined | null,
+): Promise<any> {
+
 }
 
 export async function statOrNullAsync(path: string): Promise<fs.Stats|null> {
