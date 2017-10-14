@@ -31,70 +31,70 @@ export class Processor {
   constructor(public srcDir: string, public destDir: string, public logger: bb.Logger) {
   }
 
-  async startFromFile(file: string) {
+  async startFromFile(relFile: string) {
     this.logger.info('process-file', {
-      file,
+      relFile,
     });
-    await this.markdownToHTML(file);
+    await this.markdownToHTML(relFile);
 
-    const dir = nodepath.dirname(file);
-    await this.processDir(dir);
+    const relDir = nodepath.dirname(relFile);
+    await this.processDir(relDir);
   }
 
-  private async processDir(dir: string): Promise<PathComponent[]> {
+  private async processDir(relDir: string): Promise<PathComponent[]> {
+    const absDir = this.makeSrcPath(relDir);
     this.logger.info('process-dir', {
-      dir,
+      relDir,
     });
     // check whether the dir already exists in cache
-    if (dirCache[dir]) {
+    if (dirCache[relDir]) {
       this.logger.info('process-dir.found-in-cache', {
-        dir,
+        relDir,
       });
-      return dirCache[dir] as PathComponent[];
+      return dirCache[relDir] as PathComponent[];
     }
 
     this.logger.info('process-dir.NOT-found-in-cache', {
-      dir,
+      relDir,
     });
     // ****** create path bar ******
-    const dirComponent = await this.pathComponentFromDir(dir);
+    const dirComponent = await this.pathComponentFromDir(absDir);
     const reversedComponents = [dirComponent];
-    if (await this.isRootDir(dir) === false) {
+    if (await this.isRootDir(absDir) === false) {
       this.logger.info('process-dir.NOT-root', {
-        dir,
+        absDir,
       });
       // not a root directory, find all paths components upward
-      const parentDir = nodepath.dirname(dir);
-      const parents = await this.processDir(parentDir);
+      const parentAbsDir = nodepath.dirname(absDir);
+      const parents = await this.processDir(parentAbsDir);
       for (const p of parents) {
         reversedComponents.push(p);
       }
     }
 
     // save it to disk
-    const relDir = nodepath.relative(this.srcDir, dir);
-    const destPathBarHtml = nodepath.join(this.destDir, relDir, PATHBAR_HTML);
+    const destPathBarHtml = nodepath.join(this.makeDestPath(relDir), PATHBAR_HTML);
     const pathBarHtml = this.generatePathBarHtml(reversedComponents.slice().reverse());
     this.logger.info('process-dir.write-pathbar', {
-      dir, relDir, destPathBarHtml,
+      relDir, destPathBarHtml,
     });
     await mfs.writeFileAsync(destPathBarHtml, pathBarHtml);
 
     // ****** create content.html ******
     // there are two different content.html: dir only and file only
     // check directory type
-    const subPaths = await mfs.listSubPaths(dir);
+    const subPaths = await mfs.listSubPaths(absDir);
     this.logger.info('process-dir.listSubPaths', {
-      dir, subPaths,
+      absDir, subPaths,
     });
     if (!subPaths.length) {
-      throw new Error(`No subPaths found in directory "${dir}"`);
+      throw new Error(`No subPaths found in directory "${absDir}"`);
     }
 
     const isFile = await mfs.fileExists(subPaths[0]);
     let childComponents: PathComponent[];
     this.logger.info('process-dir.listSubPaths.isFile', {
-      dir, isFile,
+      absDir, isFile,
     });
     if (isFile) {
       childComponents = await this.childComponentsFromDirs(subPaths);
@@ -107,12 +107,12 @@ export class Processor {
     // write it to disk
     const contentPath = nodepath.join(this.destDir, relDir, CONTENT_HTML);
     this.logger.info('process-dir.write-contentHtml', {
-      dir, relDir, contentPath,
+      relDir, contentPath,
     });
     await mfs.writeFileAsync(contentPath, contentHtml);
 
     // add it to cache, marking as processed
-    dirCache[dir] = reversedComponents;
+    dirCache[relDir] = reversedComponents;
 
     return reversedComponents;
   }
@@ -122,17 +122,25 @@ export class Processor {
     return await mfs.fileExists(rootFile);
   }
 
+  private makeDestPath(relFile: string): string {
+    return nodepath.join(this.srcDir, relFile);
+  }
+
+  private makeSrcPath(relFile: string): string {
+    return nodepath.join(this.srcDir, relFile);
+  }
+
   /* internal functions for markdown to HTML */
-  private async markdownToHTML(file: string) {
+  private async markdownToHTML(relFile: string) {
     this.logger.info('markdown2html', {
-      file,
+      relFile,
     });
     // read the content of file
-    const content = await mfs.readTextFileAsync(file);
+    const content = await mfs.readTextFileAsync(this.makeSrcPath(relFile));
     // generate markdown
     const html = MarkdownGenerator.convert(content);
     // write to file
-    const htmlFile = MarkdownGenerator.rename(nodepath.join(this.destDir, nodepath.relative(this.srcDir, file)));
+    const htmlFile = MarkdownGenerator.rename(this.makeDestPath(relFile));
     await mfs.writeFileAsync(htmlFile, html);
   }
 

@@ -14,7 +14,7 @@ export async function start(srcDir: string, glob: string, destDir: string, cache
   logger.info('changed-files', {
     files,
   });
-  return await Promise.all(files.map(async (file) => {
-    await processor.startFromFile(file);
+  return await Promise.all(files.map(async (relFile) => {
+    await processor.startFromFile(relFile);
   }));
 }
