@@ -21,12 +21,12 @@ class HTMLGen {
   static aRaw(nameHtml: string, hrefUrl: string): string {
     return `<a href="${hrefUrl}">${nameHtml}</a>`;
   }
-  static a(name: string, href: string): string {
-    return this.aRaw(escapeHTML(name), encodeURIComponent(href));
+  static a(content: string, href: string): string {
+    return this.aRaw(escapeHTML(content), encodeURIComponent(href));
   }
 
   static aFromComp(comp: PathComponent): string {
-    return this.a(comp.name, comp.displayName);
+    return this.a(comp.displayName, comp.name);
   }
 }
 
