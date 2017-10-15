@@ -46,14 +46,14 @@ export class Processor {
 
     // write t.g.html
     const title = await titleExtractor.fromFile(this.makeSrcPath(relFile));
-    await this.writeTitleFileForFile(relFile, title, dirComponent.attachedDisplayName);
+    await this.writeTitleFileForFile(relFile, title, dirComponent.tryGetAttachedName());
   }
 
   private async processDir(relDir: string, stackCount: number): Promise<PathComponent[]> {
     if (stackCount >= 100) {
       throw new Error('Potential infinite loop detected.');
     }
-    this.logger.info('process-dir', {
+    this.logger.info('process-dir.started', {
       relDir,
     });
     // check whether the dir already exists in cache
@@ -88,8 +88,10 @@ export class Processor {
       const prevComponent = parents[0];
       curComponent.updateParentURL(parents[0].fullURL);
       // update attachedTitle
-      curComponent.attachedDisplayName = prevComponent.attachedDisplayName;
-      curComponent.attachedDisplayNameHTML = prevComponent.attachedDisplayNameHTML;
+      if (!curComponent.attachedDisplayName) {
+        curComponent.attachedDisplayName = prevComponent.attachedDisplayName;
+        curComponent.attachedDisplayNameHTML = prevComponent.attachedDisplayNameHTML;
+      }
 
       for (const p of parents) {
         reversedComponents.push(p);
@@ -148,7 +150,7 @@ export class Processor {
 
     // ****** create t.html ******
     const title = await titleExtractor.fromDir(absDir);
-    await this.writeTitleFileForDir(relDir, title, curComponent.attachedDisplayName);
+    await this.writeTitleFileForDir(relDir, title, curComponent.tryGetAttachedName());
 
     // add it to cache, marking as processed
     dirCache[relDir] = reversedComponents;
@@ -197,6 +199,10 @@ export class Processor {
 
     const attachedTitle = await titleExtractor.attachedTitleFromDir(dir);
     if (attachedTitle) {
+      this.logger.verbose('pathComponentFromDir.found-attached-title', {
+        dir, attachedTitle,
+      });
+      component.sourceOfAttachedName = true;
       component.attachedDisplayName = attachedTitle;
       component.attachedDisplayNameHTML = escapeHTML(attachedTitle);
     }
@@ -233,7 +239,7 @@ export class Processor {
 
   /* internal methods for title generation */
   private async writeTitleFileForFile(relFile: string, title: string, attached: string) {
-    const html = this.tryEscapeTitle(title + attached || '');
+    const html = this.tryEscapeTitle(title + (attached || ''));
     const gRelFile = rename(relFile, (pathObj: any) => {
       pathObj.ext = FILE_TITLE_EXT;
     });
@@ -241,7 +247,7 @@ export class Processor {
   }
 
   private async writeTitleFileForDir(relDir: string, title: string, attached: string) {
-    const html = this.tryEscapeTitle(title + attached || '');
+    const html = this.tryEscapeTitle(title + (attached || ''));
     const dest = nodepath.join(this.makeDestPath(relDir), DIR_TITLE_HTML);
     await mfs.writeFileAsync(dest, html);
   }

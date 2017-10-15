@@ -8,6 +8,7 @@ export class PathComponent {
 
   fullURL: string;
 
+  sourceOfAttachedName: boolean;
   attachedDisplayName: string;
   attachedDisplayNameHTML: string;
 
@@ -24,5 +25,12 @@ export class PathComponent {
     } else {
       this.fullURL = '/' + this.urlName;
     }
+  }
+
+  tryGetAttachedName(): string {
+    if (!this.sourceOfAttachedName) {
+      return this.attachedDisplayName;
+    }
+    return '';
   }
 }

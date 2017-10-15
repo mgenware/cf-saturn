@@ -1,6 +1,6 @@
 {
   "name": "cf-saturn",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "description": "Wiki-like static content generator",
   "main": "dist/lib/main.js",
   "types": "dist/lib/main.d.ts",
@@ -40,11 +40,11 @@
     "barbary": "^0.0.3",
     "escape-html": "^1.0.3",
     "fx43": "^0.0.8",
+    "lodash.trimend": "^4.5.1",
     "m-fs": "^0.0.1",
     "mkdirp-promise": "^5.0.1",
     "node-filter-async": "^0.0.3",
     "node-rename-path": "^1.0.0",
-    "remarkable": "^1.7.1",
-    "trim": "^0.0.1"
+    "remarkable": "^1.7.1"
   }
 }
