@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "barbary": "^0.0.3",
-    "bluebird": "^3.5.1",
     "escape-html": "^1.0.3",
     "fx43": "^0.0.8",
     "m-fs": "^0.0.1",

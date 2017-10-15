@@ -3,6 +3,8 @@ import * as mfs from 'm-fs';
 import titleExtractor from './titleExtractor';
 import * as MarkdownGenerator from './markdownGenerator';
 import * as bb from 'barbary';
+import {PathBarItem, PathComponent} from './eventArgs';
+import ContentGenerator from './contentGenerator';
 const rename = require('node-rename-path');
 const escapeHTML = require('escape-html') as any;
 
@@ -13,51 +15,15 @@ const DIR_TITLE_HTML = '__dir.t.g.html';
 const FILE_TITLE_EXT = '.t.g.html';
 const dirCache: { [key: string]: PathBarItem[]|null } = {};
 
-export class PathComponent {
-  constructor(public name: string, public displayName: string) { }
-}
-
-export class PathBarItem {
-  static fromPathComponent(comp: PathComponent): PathBarItem {
-    return new PathBarItem(comp.name, comp.displayName);
-  }
-
-  urlName: string;
-  htmlDisplayName: string;
-  fullURL: string;
-
-  constructor(name: string, displayName: string) {
-    this.urlName = encodeURIComponent(name);
-    this.htmlDisplayName = escapeHTML(displayName);
-    this.updateParentURL(null);
-  }
-
-  updateParentURL(parentURL: string|null) {
-    if (parentURL) {
-      this.fullURL = nodepath.join(parentURL, this.urlName);
-    } else {
-      this.fullURL = '/' + this.urlName;
-    }
-  }
-}
-
-class HTMLGen {
-  static aRaw(nameHtml: string, hrefUrl: string): string {
-    return `<a href="${hrefUrl}">${nameHtml}</a>`;
-  }
-  static a(content: string, href: string): string {
-    return this.aRaw(escapeHTML(content), encodeURIComponent(href));
-  }
-
-  static aFromComp(comp: PathComponent): string {
-    return this.a(comp.displayName, comp.name);
-  }
-}
-
 export class Processor {
   ignoredFiles: { [key: string]: boolean|null } = {};
 
-  constructor(public srcDir: string, public destDir: string, public logger: bb.Logger) {
+  constructor(
+    public srcDir: string,
+    public destDir: string,
+    public logger: bb.Logger,
+    public generator: ContentGenerator,
+  ) {
     const ignoredFiles = [titleExtractor.TITLE_FILE, '.DS_Store', 'thumbs.db'];
     for (const file of ignoredFiles) {
       this.ignoredFiles[file] = true;
@@ -124,7 +90,7 @@ export class Processor {
 
     // save it to disk
     const destPathBarHtml = nodepath.join(this.makeDestPath(relDir), DIR_PATHBAR_HTML);
-    const pathBarHtml = this.generatePathBarHtml(reversedComponents.slice().reverse());
+    const pathBarHtml = this.generator.generatePathBarHtml(reversedComponents.slice().reverse());
     this.logger.info('process-dir.write-pathbar', {
       relDir, destPathBarHtml,
     });
@@ -164,7 +130,7 @@ export class Processor {
     }
 
     // generate the content.g.html
-    const contentHtml = this.generateContentHtml(childComponents);
+    const contentHtml = this.generator.generateContentHtml(childComponents);
     // write it to disk
     const contentPath = nodepath.join(this.destDir, relDir, DIR_CONTENT_HTML);
     this.logger.info('process-dir.write-contentHtml', {
@@ -231,15 +197,6 @@ export class Processor {
     return new PathComponent(name, title);
   }
 
-  private generatePathBarHtml(comps: PathBarItem[]): string {
-    let res = '';
-    for (const comp of comps) {
-      const aHtml = HTMLGen.aRaw(comp.htmlDisplayName, comp.fullURL);
-      res += aHtml;
-    }
-    return res;
-  }
-
   /* internal functions for content generation */
   private async childComponentsFromDirs(dirs: string[]): Promise<PathComponent[]> {
     return await Promise.all(dirs.map(async (d) => {
@@ -251,16 +208,6 @@ export class Processor {
     return await Promise.all(files.map(async (file) => {
       return await this.pathComponentFromFile(file);
     }));
-  }
-
-  private generateContentHtml(comps: PathComponent[]): string {
-    let res = '<ul>';
-    for (const comp of comps) {
-      const aHtml = HTMLGen.aFromComp(comp);
-      res += `<li>${aHtml}</li>`;
-    }
-    res += '</ul>';
-    return res;
   }
 
   private async isLeafDir(absDir: string): Promise<boolean> {
