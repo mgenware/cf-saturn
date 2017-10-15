@@ -3,7 +3,7 @@ import * as mfs from 'm-fs';
 import titleExtractor from './titleExtractor';
 import * as MarkdownGenerator from './markdownGenerator';
 import * as bb from 'barbary';
-import {PathBarItem, PathComponent} from './eventArgs';
+import { PathComponent } from './eventArgs';
 import ContentGenerator from './contentGenerator';
 const rename = require('node-rename-path');
 const escapeHTML = require('escape-html') as any;
@@ -13,7 +13,7 @@ const DIR_PATHBAR_HTML = '__dir.path.g.html';
 const DIR_CONTENT_HTML = '__dir.content.g.html';
 const DIR_TITLE_HTML = '__dir.t.g.html';
 const FILE_TITLE_EXT = '.t.g.html';
-const dirCache: { [key: string]: PathBarItem[]|null } = {};
+const dirCache: { [key: string]: PathComponent[]|null } = {};
 
 export class Processor {
   ignoredFiles: { [key: string]: boolean|null } = {};
@@ -45,7 +45,7 @@ export class Processor {
     await this.processDir(relDir, 1);
   }
 
-  private async processDir(relDir: string, stackCount: number): Promise<PathBarItem[]> {
+  private async processDir(relDir: string, stackCount: number): Promise<PathComponent[]> {
     if (stackCount >= 100) {
       throw new Error('Potential infinite loop detected.');
     }
@@ -57,7 +57,7 @@ export class Processor {
       this.logger.info('process-dir.found-in-cache', {
         relDir,
       });
-      return dirCache[relDir] as PathBarItem[];
+      return dirCache[relDir] as PathComponent[];
     }
 
     this.logger.info('process-dir.NOT-found-in-cache', {
@@ -65,7 +65,7 @@ export class Processor {
     });
     // ****** create path bar ******
     const absDir = this.makeSrcPath(relDir);
-    const curPathBarItem = PathBarItem.fromPathComponent(await this.pathComponentFromDir(absDir));
+    const curPathBarItem = await this.pathComponentFromDir(absDir);
     const reversedComponents = [curPathBarItem];
     if (relDir !== '.' && await this.isRootDir(absDir) === false) {
       this.logger.info('process-dir.NOT-root', {

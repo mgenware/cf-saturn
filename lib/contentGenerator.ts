@@ -1,11 +1,11 @@
-import {PathBarItem, PathComponent} from './eventArgs';
+import { PathComponent } from './eventArgs';
 
 export default class ContentGenerator {
-  generatePathBarHtml(items: PathBarItem[]): string {
-    throw new Error(`Not implemented yet: ${items}`);
+  generatePathBarHtml(items: PathComponent[]): string {
+    throw new Error(`Not implemented yet: ${JSON.stringify(items)}`);
   }
 
-  generateContentHtml(comps: PathComponent[]): string {
-    throw new Error(`Not implemented yet: ${comps}`);
+  generateContentHtml(items: PathComponent[]): string {
+    throw new Error(`Not implemented yet: ${JSON.stringify(items)}`);
   }
 }
