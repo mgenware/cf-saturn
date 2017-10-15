@@ -1,4 +1,4 @@
-import * as mfs from './mfs';
+import * as mfs from 'm-fs';
 import * as nodepath from 'path';
 
 const DIR_TITLE_FILE = 't.txt';

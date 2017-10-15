@@ -1,5 +1,5 @@
 import * as nodepath from 'path';
-import * as mfs from './mfs';
+import * as mfs from 'm-fs';
 import titleExtractor from './titleExtractor';
 import * as MarkdownGenerator from './markdownGenerator';
 import * as bb from 'barbary';
@@ -28,7 +28,7 @@ class HTMLGen {
 }
 
 export class Processor {
-  ignoredFiles: { [key: string]: boolean } = {};
+  ignoredFiles: { [key: string]: boolean|null } = {};
 
   constructor(public srcDir: string, public destDir: string, public logger: bb.Logger) {
     const ignoredFiles = [titleExtractor.TITLE_FILE, '.DS_Store', 'thumbs.db'];
@@ -101,23 +101,25 @@ export class Processor {
       absDir, isLeafDir,
     });
     if (isLeafDir) {
+      this.logger.info('process-dir.list-subfiles.started', {
+        absDir,
+      });
+      let subfiles = await mfs.listSubFiles(absDir);
+      // remove ignored files
+      subfiles = subfiles.filter((file) => !this.ignoredFiles[file]);
+      if (!subfiles.length) {
+        throw new Error(`No files found in "${absDir}"`);
+      }
+      childComponents = await this.childComponentsFromFiles(subfiles);
+    } else {
       this.logger.info('process-dir.list-subdirs.started', {
         absDir,
       });
       const subdirs = await mfs.listSubDirs(absDir);
       childComponents = await this.childComponentsFromDirs(subdirs);
       if (!subdirs.length) {
-        throw new Error(`Empty dir is not allowed "${absDir}"`);
+        throw new Error(`No dirs found in "${absDir}"`);
       }
-    } else {
-      this.logger.info('process-dir.list-subfiles.started', {
-        absDir,
-      });
-      const subfiles = await mfs.listSubFiles(absDir);
-      if (!subfiles.length) {
-        throw new Error(`Empty dir is not allowed "${absDir}"`);
-      }
-      childComponents = await this.childComponentsFromFiles(subfiles);
     }
 
     // generate the content.g.html
@@ -218,7 +220,7 @@ export class Processor {
 
   private async isLeafDir(absDir: string): Promise<boolean> {
     // check if this dir is a leaf dir
-    let subdirs = await mfs.listSubDirs(absDir);
+    const subdirs = await mfs.listSubDirs(absDir);
     return subdirs.length === 0;
   }
 }

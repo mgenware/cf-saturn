@@ -13,7 +13,7 @@ export async function start(srcDir: string, glob: string, destDir: string, cache
 
   const processor = new core.Processor(srcDir, destDir, logger);
   // only changed file will be processed
-  const files = await fx43.start(srcDir, glob, cacheDir);
+  const files = await fx43.start(srcDir, glob, cacheDir, true);
   logger.info('changed-files', {
     files,
   });
