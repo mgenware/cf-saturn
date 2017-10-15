@@ -15,6 +15,6 @@ export function convert(content: string): string {
 
 export function rename(file: string): string {
   return nodeRename(file, (pathObj: any) => {
-    pathObj.ext = 'g.html';
+    pathObj.ext = '.g.html';
   });
 }
