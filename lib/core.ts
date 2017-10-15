@@ -238,14 +238,16 @@ export class Processor {
 
   /* internal functions for title generation */
   private async writeTitleFileForFile(relFile: string, title: string) {
+    const html = escapeHTML(title);
     const gRelFile = rename(relFile, (pathObj: any) => {
       pathObj.ext = FILE_TITLE_EXT;
     });
-    await mfs.writeFileAsync(this.makeDestPath(gRelFile), title);
+    await mfs.writeFileAsync(this.makeDestPath(gRelFile), html);
   }
 
   private async writeTitleFileForDir(relDir: string, title: string) {
+    const html = escapeHTML(title);
     const dest = nodepath.join(this.makeDestPath(relDir), DIR_TITLE_HTML);
-    await mfs.writeFileAsync(dest, title);
+    await mfs.writeFileAsync(dest, html);
   }
 }
