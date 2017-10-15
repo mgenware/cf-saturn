@@ -139,6 +139,11 @@ export class Processor {
       }
     }
 
+    // update children's fullURL
+    for (const comp of childComponents) {
+      comp.updateParentURL(curComponent.fullURL);
+    }
+
     // generate the content.g.html
     const contentHtml = this.generator.generateContentHtml(childComponents);
     // write it to disk

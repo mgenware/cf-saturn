@@ -13,7 +13,7 @@ class MyGenerator extends saturn.ContentGenerator {
   generateContentHtml(items: saturn.PathComponent[]): string {
     let html = '<div class="k-content"><ul>';
     for (const item of items) {
-      html += this.makeATag(item.displayNameHTML, item.urlName);
+      html += this.makeATag(item.displayNameHTML, item.fullURL);
     }
     html += '</ul></div>';
     return html;
