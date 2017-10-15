@@ -11,10 +11,34 @@ const DIR_PATHBAR_HTML = '__dir.path.g.html';
 const DIR_CONTENT_HTML = '__dir.content.g.html';
 const DIR_TITLE_HTML = '__dir.t.g.html';
 const FILE_TITLE_EXT = '.t.g.html';
-const dirCache: { [key: string]: PathComponent[]|null } = {};
+const dirCache: { [key: string]: PathBarItem[]|null } = {};
 
 export class PathComponent {
   constructor(public name: string, public displayName: string) { }
+}
+
+export class PathBarItem {
+  static fromPathComponent(comp: PathComponent): PathBarItem {
+    return new PathBarItem(comp.name, comp.displayName);
+  }
+
+  urlName: string;
+  htmlDisplayName: string;
+  fullURL: string;
+
+  constructor(name: string, displayName: string) {
+    this.urlName = encodeURIComponent(name);
+    this.htmlDisplayName = escapeHTML(displayName);
+    this.updateParentURL(null);
+  }
+
+  updateParentURL(parentURL: string|null) {
+    if (parentURL) {
+      this.fullURL = nodepath.join(parentURL, this.urlName);
+    } else {
+      this.fullURL = '/' + this.urlName;
+    }
+  }
 }
 
 class HTMLGen {
@@ -55,7 +79,7 @@ export class Processor {
     await this.processDir(relDir, 1);
   }
 
-  private async processDir(relDir: string, stackCount: number): Promise<PathComponent[]> {
+  private async processDir(relDir: string, stackCount: number): Promise<PathBarItem[]> {
     if (stackCount >= 100) {
       throw new Error('Potential infinite loop detected.');
     }
@@ -67,7 +91,7 @@ export class Processor {
       this.logger.info('process-dir.found-in-cache', {
         relDir,
       });
-      return dirCache[relDir] as PathComponent[];
+      return dirCache[relDir] as PathBarItem[];
     }
 
     this.logger.info('process-dir.NOT-found-in-cache', {
@@ -75,8 +99,8 @@ export class Processor {
     });
     // ****** create path bar ******
     const absDir = this.makeSrcPath(relDir);
-    const dirComponent = await this.pathComponentFromDir(absDir);
-    const reversedComponents = [dirComponent];
+    const curPathBarItem = PathBarItem.fromPathComponent(await this.pathComponentFromDir(absDir));
+    const reversedComponents = [curPathBarItem];
     if (relDir !== '.' && await this.isRootDir(absDir) === false) {
       this.logger.info('process-dir.NOT-root', {
         relDir,
@@ -84,6 +108,15 @@ export class Processor {
       // not a root directory, find all paths components upward
       const parentRelDir = nodepath.dirname(relDir);
       const parents = await this.processDir(parentRelDir, stackCount + 1);
+
+      // make sure parents are not empty
+      if (!parents.length) {
+        throw new Error(`${relDir} is not a root dir, but got an empty PathBarItem array from parents.`);
+      }
+
+      // update PathBarItem.url
+      curPathBarItem.updateParentURL(parents[0].fullURL);
+
       for (const p of parents) {
         reversedComponents.push(p);
       }
@@ -198,13 +231,13 @@ export class Processor {
     return new PathComponent(name, title);
   }
 
-  private generatePathBarHtml(comps: PathComponent[]): string {
+  private generatePathBarHtml(comps: PathBarItem[]): string {
     let res = '';
     for (const comp of comps) {
-      const aHtml = HTMLGen.a(comp.displayName, comp.name);
+      const aHtml = HTMLGen.aRaw(comp.htmlDisplayName, comp.fullURL);
       res += aHtml;
     }
-    return '';
+    return res;
   }
 
   /* internal functions for content generation */
