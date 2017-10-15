@@ -28,7 +28,13 @@ class HTMLGen {
 }
 
 export class Processor {
+  ignoredFiles: { [key: string]: boolean } = {};
+
   constructor(public srcDir: string, public destDir: string, public logger: bb.Logger) {
+    const ignoredFiles = [titleExtractor.TITLE_FILE, '.DS_Store', 'thumbs.db'];
+    for (const file of ignoredFiles) {
+      this.ignoredFiles[file] = true;
+    }
   }
 
   async startFromFile(relFile: string) {
@@ -86,26 +92,32 @@ export class Processor {
     // ****** create content.html ******
     // there are two different content.html: dir only and file only
     // check directory type
-    this.logger.info('process-dir.listSubPaths.started', {
+    this.logger.info('process-dir.leaf-dir-checking.started', {
       absDir,
     });
-    const subPaths = await mfs.listSubPaths(absDir);
-    this.logger.info('process-dir.listSubPaths.completed', {
-      absDir, subPaths,
-    });
-    if (!subPaths.length) {
-      throw new Error(`No subPaths found in directory "${absDir}"`);
-    }
-
     const isLeafDir = await this.isLeafDir(absDir);
     let childComponents: PathComponent[];
-    this.logger.info('process-dir.listSubPaths.isFile', {
+    this.logger.info('process-dir.leaf-dir-checking.ended', {
       absDir, isLeafDir,
     });
     if (isLeafDir) {
-      childComponents = await this.childComponentsFromDirs(subPaths);
+      this.logger.info('process-dir.list-subdirs.started', {
+        absDir,
+      });
+      const subdirs = await mfs.listSubDirs(absDir);
+      childComponents = await this.childComponentsFromDirs(subdirs);
+      if (!subdirs.length) {
+        throw new Error(`Empty dir is not allowed "${absDir}"`);
+      }
     } else {
-      childComponents = await this.childComponentsFromFiles(subPaths);
+      this.logger.info('process-dir.list-subfiles.started', {
+        absDir,
+      });
+      const subfiles = await mfs.listSubFiles(absDir);
+      if (!subfiles.length) {
+        throw new Error(`Empty dir is not allowed "${absDir}"`);
+      }
+      childComponents = await this.childComponentsFromFiles(subfiles);
     }
 
     // generate the content.g.html
