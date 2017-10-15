@@ -1,29 +1,8 @@
 import * as nodepath from 'path';
 import * as fx43 from 'fx43';
 import * as core from './core';
-import * as bb from 'barbary';
+import Config from './config';
 import ContentGenerator from './contentGenerator';
-
-export class Config {
-  logger: bb.Logger;
-
-  constructor(
-    public srcDir: string,
-    public glob: string,
-    public destDir: string,
-    public cacheDir: string|null,
-  ) {
-    this.validateParameter(srcDir, 'srcDir');
-    this.validateParameter(glob, 'glob');
-    this.validateParameter(destDir, 'destDir');
-  }
-
-  validateParameter(value: string, name: string) {
-    if (!value) {
-      throw new Error(`${name} cannot be empty`);
-    }
-  }
-}
 
 export async function start(config: Config, generator: ContentGenerator) {
   if (!config) {
@@ -42,7 +21,7 @@ export async function start(config: Config, generator: ContentGenerator) {
     srcDir, destDir, cacheDir,
   });
 
-  const processor = new core.Processor(srcDir, destDir, logger, generator);
+  const processor = new core.Processor(config, generator);
   // only changed files will be processed
   const files = await fx43.start(srcDir, glob, cacheDir, true);
   logger.info('changed-files', {

@@ -5,23 +5,22 @@ import * as MarkdownGenerator from './markdownGenerator';
 import * as bb from 'barbary';
 import { PathComponent } from './eventArgs';
 import ContentGenerator from './contentGenerator';
+import Config from './config';
 const rename = require('node-rename-path');
 const escapeHTML = require('escape-html') as any;
 
 const ROOTPROJ = 'root.json';
 const DIR_PATHBAR_HTML = '__dir.path.g.html';
 const DIR_CONTENT_HTML = '__dir.content.g.html';
-const DIR_TITLE_HTML = '__dir.t.g.html';
-const FILE_TITLE_EXT = '.t.g.html';
+const DIR_TITLE_HTML = '__dir.t.g.txt';
+const FILE_TITLE_EXT = '.t.g.txt';
 const dirCache: { [key: string]: PathComponent[]|null } = {};
 
 export class Processor {
   ignoredFiles: { [key: string]: boolean|null } = {};
 
   constructor(
-    public srcDir: string,
-    public destDir: string,
-    public logger: bb.Logger,
+    public config: Config,
     public generator: ContentGenerator,
   ) {
     const ignoredFiles = [titleExtractor.TITLE_FILE, '.DS_Store', 'thumbs.db'];
@@ -37,12 +36,17 @@ export class Processor {
     // write content.g.html
     await this.markdownToHTML(relFile);
 
+    // process parent dir
+    const relDir = nodepath.dirname(relFile);
+    const components = await this.processDir(relDir, 1);
+    if (!components.length) {
+      throw new Error('Internal error: components should not be empty');
+    }
+    const dirComponent = components[0];
+
     // write t.g.html
     const title = await titleExtractor.fromFile(this.makeSrcPath(relFile));
-    await this.writeTitleFileForFile(relFile, title);
-
-    const relDir = nodepath.dirname(relFile);
-    await this.processDir(relDir, 1);
+    await this.writeTitleFileForFile(relFile, title, dirComponent.attachedDisplayName);
   }
 
   private async processDir(relDir: string, stackCount: number): Promise<PathComponent[]> {
@@ -65,8 +69,8 @@ export class Processor {
     });
     // ****** create path bar ******
     const absDir = this.makeSrcPath(relDir);
-    const curPathBarItem = await this.pathComponentFromDir(absDir);
-    const reversedComponents = [curPathBarItem];
+    const curComponent = await this.pathComponentFromDir(absDir);
+    const reversedComponents = [curComponent];
     if (relDir !== '.' && await this.isRootDir(absDir) === false) {
       this.logger.info('process-dir.NOT-root', {
         relDir,
@@ -80,8 +84,12 @@ export class Processor {
         throw new Error(`${relDir} is not a root dir, but got an empty PathBarItem array from parents.`);
       }
 
-      // update PathBarItem.url
-      curPathBarItem.updateParentURL(parents[0].fullURL);
+      // update fullURL
+      const prevComponent = parents[0];
+      curComponent.updateParentURL(parents[0].fullURL);
+      // update attachedTitle
+      curComponent.attachedDisplayName = prevComponent.attachedDisplayName;
+      curComponent.attachedDisplayNameHTML = prevComponent.attachedDisplayNameHTML;
 
       for (const p of parents) {
         reversedComponents.push(p);
@@ -132,7 +140,7 @@ export class Processor {
     // generate the content.g.html
     const contentHtml = this.generator.generateContentHtml(childComponents);
     // write it to disk
-    const contentPath = nodepath.join(this.destDir, relDir, DIR_CONTENT_HTML);
+    const contentPath = nodepath.join(this.makeDestPath(relDir), DIR_CONTENT_HTML);
     this.logger.info('process-dir.write-contentHtml', {
       relDir, contentPath,
     });
@@ -140,7 +148,7 @@ export class Processor {
 
     // ****** create t.html ******
     const title = await titleExtractor.fromDir(absDir);
-    await this.writeTitleFileForDir(relDir, title);
+    await this.writeTitleFileForDir(relDir, title, curComponent.attachedDisplayName);
 
     // add it to cache, marking as processed
     dirCache[relDir] = reversedComponents;
@@ -154,14 +162,14 @@ export class Processor {
   }
 
   private makeSrcPath(relFile: string): string {
-    return nodepath.join(this.srcDir, relFile);
+    return nodepath.join(this.config.srcDir, relFile);
   }
 
   private makeDestPath(relFile: string): string {
-    return nodepath.join(this.destDir, relFile);
+    return nodepath.join(this.config.destDir, relFile);
   }
 
-  /* internal functions for markdown to HTML */
+  /* internal methods for markdown to HTML */
   private async markdownToHTML(relFile: string) {
     this.logger.info('markdown2html-start', {
       relFile,
@@ -178,14 +186,21 @@ export class Processor {
     await mfs.writeFileAsync(htmlFile, html);
   }
 
-  /* internal functions for pathBar generation */
+  /* internal methods for pathBar generation */
   private async pathComponentFromDir(dir: string): Promise<PathComponent> {
     this.logger.verbose('pathComponentFromDir', {
       dir,
     });
     const dirName = nodepath.basename(dir);
     const title = await titleExtractor.fromDir(dir);
-    return new PathComponent(dirName, title);
+    const component = new PathComponent(dirName, title);
+
+    const attachedTitle = await titleExtractor.attachedTitleFromDir(dir);
+    if (attachedTitle) {
+      component.attachedDisplayName = attachedTitle;
+      component.attachedDisplayNameHTML = escapeHTML(attachedTitle);
+    }
+    return component;
   }
 
   private async pathComponentFromFile(file: string): Promise<PathComponent> {
@@ -197,7 +212,7 @@ export class Processor {
     return new PathComponent(name, title);
   }
 
-  /* internal functions for content generation */
+  /* internal methods for content generation */
   private async childComponentsFromDirs(dirs: string[]): Promise<PathComponent[]> {
     return await Promise.all(dirs.map(async (d) => {
       return await this.pathComponentFromDir(d);
@@ -216,18 +231,30 @@ export class Processor {
     return subdirs.length === 0;
   }
 
-  /* internal functions for title generation */
-  private async writeTitleFileForFile(relFile: string, title: string) {
-    const html = escapeHTML(title);
+  /* internal methods for title generation */
+  private async writeTitleFileForFile(relFile: string, title: string, attached: string) {
+    const html = this.tryEscapeTitle(title + attached || '');
     const gRelFile = rename(relFile, (pathObj: any) => {
       pathObj.ext = FILE_TITLE_EXT;
     });
     await mfs.writeFileAsync(this.makeDestPath(gRelFile), html);
   }
 
-  private async writeTitleFileForDir(relDir: string, title: string) {
-    const html = escapeHTML(title);
+  private async writeTitleFileForDir(relDir: string, title: string, attached: string) {
+    const html = this.tryEscapeTitle(title + attached || '');
     const dest = nodepath.join(this.makeDestPath(relDir), DIR_TITLE_HTML);
     await mfs.writeFileAsync(dest, html);
+  }
+
+  private tryEscapeTitle(title: string): string {
+    if (this.config.escapeTitle) {
+      return escapeHTML(title);
+    }
+    return title;
+  }
+
+  /* internal helper methods */
+  private get logger(): bb.Logger {
+    return this.config.logger;
   }
 }

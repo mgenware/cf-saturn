@@ -3,12 +3,18 @@ const escapeHTML = require('escape-html') as any;
 
 export class PathComponent {
   urlName: string;
-  htmlDisplayName: string;
+  displayNameHTML: string;
+  rawName: string;
+
   fullURL: string;
 
+  attachedDisplayName: string;
+  attachedDisplayNameHTML: string;
+
   constructor(public name: string, public displayName: string) {
+    this.rawName = name;
     this.urlName = encodeURIComponent(name);
-    this.htmlDisplayName = escapeHTML(displayName);
+    this.displayNameHTML = escapeHTML(displayName);
     this.updateParentURL(null);
   }
 

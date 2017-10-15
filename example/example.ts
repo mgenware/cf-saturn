@@ -2,12 +2,25 @@ import * as nodepath from 'path';
 import * as saturn from '../lib/main';
 
 class MyGenerator extends saturn.ContentGenerator {
-  generatePathBarHtml(items: saturn.PathBarItem[]): string {
-    throw new Error(`Not implemented yet: ${items}`);
+  generatePathBarHtml(items: saturn.PathComponent[]): string {
+    let html = '';
+    for (const item of items) {
+      html += this.makeATag(item.displayNameHTML, item.fullURL);
+    }
+    return html;
   }
 
-  generateContentHtml(comps: saturn.PathComponent[]): string {
-    throw new Error(`Not implemented yet: ${comps}`);
+  generateContentHtml(items: saturn.PathComponent[]): string {
+    let html = '<div class="k-content"><ul>';
+    for (const item of items) {
+      html += this.makeATag(item.displayNameHTML, item.urlName);
+    }
+    html += '</ul></div>';
+    return html;
+  }
+
+  makeATag(rawContent: string, rawHref: string): string {
+    return `<a href="${rawHref}">${rawContent}</a>`;
   }
 }
 

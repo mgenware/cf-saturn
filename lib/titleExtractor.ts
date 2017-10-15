@@ -1,11 +1,13 @@
 import * as mfs from 'm-fs';
 import * as nodepath from 'path';
 
-const DIR_TITLE_FILE = 't.txt';
-
 export default class TitleExtractor {
   static get TITLE_FILE(): string {
-    return DIR_TITLE_FILE;
+    return 't.txt';
+  }
+
+  static get ATTACHED_TITLE_FILE(): string {
+    return 't_attached.txt';
   }
 
   static async fromFile(file: string): Promise<string> {
@@ -25,14 +27,22 @@ export default class TitleExtractor {
 
   static async fromDir(dir: string): Promise<string> {
     // check dir/t.txt
-    const tTxt = nodepath.join(dir, DIR_TITLE_FILE);
+    const file = nodepath.join(dir, this.TITLE_FILE);
     let displayTitle: string = '';
-    if (await mfs.fileExists(tTxt)) {
-      displayTitle = await mfs.readFileAsync(tTxt, 'utf8');
+    if (await mfs.fileExists(file)) {
+      displayTitle = await mfs.readTextFileAsync(file);
     } else {
       // if dir/t.txt doesn't exist, take directory name as title
       displayTitle = nodepath.basename(dir);
     }
     return displayTitle;
+  }
+
+  static async attachedTitleFromDir(dir: string): Promise<string|null> {
+    const file = nodepath.join(dir, this.ATTACHED_TITLE_FILE);
+    if (await mfs.fileExists(file)) {
+      return await mfs.readdirAsync(file);
+    }
+    return null;
   }
 }
