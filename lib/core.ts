@@ -3,11 +3,14 @@ import * as mfs from 'm-fs';
 import titleExtractor from './titleExtractor';
 import * as MarkdownGenerator from './markdownGenerator';
 import * as bb from 'barbary';
+const rename = require('node-rename-path');
 const escapeHTML = require('escape-html') as any;
 
 const ROOTPROJ = 'root.json';
-const PATHBAR_HTML = 'pathBar.g.html';
-const CONTENT_HTML = 'content.g.html';
+const DIR_PATHBAR_HTML = '__dir.path.g.html';
+const DIR_CONTENT_HTML = '__dir.content.g.html';
+const DIR_TITLE_HTML = '__dir.t.g.html';
+const FILE_TITLE_EXT = '.t.g.html';
 const dirCache: { [key: string]: PathComponent[]|null } = {};
 
 export class PathComponent {
@@ -41,7 +44,12 @@ export class Processor {
     this.logger.info('process-file', {
       relFile,
     });
+    // write content.g.html
     await this.markdownToHTML(relFile);
+
+    // write t.g.html
+    const title = await titleExtractor.fromFile(this.makeSrcPath(relFile));
+    await this.writeTitleFileForFile(relFile, title);
 
     const relDir = nodepath.dirname(relFile);
     await this.processDir(relDir, 1);
@@ -82,7 +90,7 @@ export class Processor {
     }
 
     // save it to disk
-    const destPathBarHtml = nodepath.join(this.makeDestPath(relDir), PATHBAR_HTML);
+    const destPathBarHtml = nodepath.join(this.makeDestPath(relDir), DIR_PATHBAR_HTML);
     const pathBarHtml = this.generatePathBarHtml(reversedComponents.slice().reverse());
     this.logger.info('process-dir.write-pathbar', {
       relDir, destPathBarHtml,
@@ -125,11 +133,15 @@ export class Processor {
     // generate the content.g.html
     const contentHtml = this.generateContentHtml(childComponents);
     // write it to disk
-    const contentPath = nodepath.join(this.destDir, relDir, CONTENT_HTML);
+    const contentPath = nodepath.join(this.destDir, relDir, DIR_CONTENT_HTML);
     this.logger.info('process-dir.write-contentHtml', {
       relDir, contentPath,
     });
     await mfs.writeFileAsync(contentPath, contentHtml);
+
+    // ****** create t.html ******
+    const title = await titleExtractor.fromDir(absDir);
+    await this.writeTitleFileForDir(relDir, title);
 
     // add it to cache, marking as processed
     dirCache[relDir] = reversedComponents;
@@ -222,5 +234,18 @@ export class Processor {
     // check if this dir is a leaf dir
     const subdirs = await mfs.listSubDirs(absDir);
     return subdirs.length === 0;
+  }
+
+  /* internal functions for title generation */
+  private async writeTitleFileForFile(relFile: string, title: string) {
+    const gRelFile = rename(relFile, (pathObj: any) => {
+      pathObj.ext = FILE_TITLE_EXT;
+    });
+    await mfs.writeFileAsync(this.makeDestPath(gRelFile), title);
+  }
+
+  private async writeTitleFileForDir(relDir: string, title: string) {
+    const dest = nodepath.join(this.makeDestPath(relDir), DIR_TITLE_HTML);
+    await mfs.writeFileAsync(dest, title);
   }
 }
