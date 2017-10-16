@@ -17,6 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/bluebird": "^3.5.16",
+    "@types/globby": "^6.1.0",
     "@types/mocha": "*",
     "@types/node": "*",
     "copyfiles": "^1.2.0",
@@ -38,8 +39,10 @@
   },
   "dependencies": {
     "barbary": "^0.0.3",
+    "bluebird": "^3.5.1",
     "escape-html": "^1.0.3",
     "fx43": "^0.0.8",
+    "globby": "^6.1.0",
     "lodash.trimend": "^4.5.1",
     "m-fs": "^0.0.1",
     "mkdirp-promise": "^5.0.1",

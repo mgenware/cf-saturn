@@ -1,6 +1,7 @@
 import * as nodepath from 'path';
 import * as fx43 from 'fx43';
 import * as core from './core';
+import * as bluebird from 'bluebird';
 import Config from './config';
 import ContentGenerator from './contentGenerator';
 
@@ -13,7 +14,7 @@ export async function start(config: Config, generator: ContentGenerator) {
   }
 
   let {srcDir, destDir, cacheDir} = config;
-  const {logger, glob} = config;
+  const {logger} = config;
   srcDir = nodepath.resolve(srcDir);
   destDir = nodepath.resolve(destDir);
   cacheDir = nodepath.resolve(cacheDir);
@@ -23,11 +24,11 @@ export async function start(config: Config, generator: ContentGenerator) {
 
   const processor = new core.Processor(config, generator);
   // only changed files will be processed
-  const files = await fx43.start(srcDir, glob, cacheDir, true);
+  const files = await fx43.start(srcDir, '**/*.{md,json}', cacheDir);
   logger.info('changed-files', {
     files,
   });
-  return await Promise.all(files.map(async (relFile) => {
+  return await bluebird.mapSeries(files, async (relFile) => {
     await processor.startFromFile(relFile);
-  }));
+  });
 }

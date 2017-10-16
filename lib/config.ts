@@ -6,12 +6,10 @@ export default class Config {
 
   constructor(
     public srcDir: string,
-    public glob: string,
     public destDir: string,
     public cacheDir: string|null,
   ) {
     this.validateParameter(srcDir, 'srcDir');
-    this.validateParameter(glob, 'glob');
     this.validateParameter(destDir, 'destDir');
   }
 

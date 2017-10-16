@@ -25,10 +25,9 @@ class MyGenerator extends saturn.ContentGenerator {
 }
 
 const src = './data/root';
-const glob = '**/*.md';
 const dest = nodepath.join(src, '../saturn/dist');
 const cache = nodepath.join(src, '../saturn/cache');
-const config = new saturn.Config(src, glob, dest, cache);
+const config = new saturn.Config(src, dest, cache);
 config.logger = new saturn.Logger(new saturn.ConsoleProvider({ showColor: true }), null);
 
 saturn.start(config, new MyGenerator());

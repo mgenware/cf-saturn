@@ -6,15 +6,21 @@ import * as bb from 'barbary';
 import { PathComponent } from './eventArgs';
 import ContentGenerator from './contentGenerator';
 import Config from './config';
+import * as globby from 'globby';
 const rename = require('node-rename-path');
 const escapeHTML = require('escape-html') as any;
 
-const ROOTPROJ = 'root.json';
 const DIR_PATHBAR_HTML = '__dir.path.g.html';
 const DIR_CONTENT_HTML = '__dir.content.g.html';
 const DIR_TITLE_HTML = '__dir.t.g.txt';
 const FILE_TITLE_EXT = '.t.g.txt';
+const FILE_JMP_EXT = '.jmp.g.txt';
 const dirCache: { [key: string]: PathComponent[]|null } = {};
+
+class JSONConfig {
+  mode: string;
+  value: string;
+}
 
 export class Processor {
   ignoredFiles: { [key: string]: boolean|null } = {};
@@ -22,17 +28,36 @@ export class Processor {
   constructor(
     public config: Config,
     public generator: ContentGenerator,
-  ) {
-    const ignoredFiles = [titleExtractor.TITLE_FILE, '.DS_Store', 'thumbs.db'];
-    for (const file of ignoredFiles) {
-      this.ignoredFiles[file] = true;
-    }
-  }
+  ) { }
 
   async startFromFile(relFile: string) {
     this.logger.info('process-file', {
       relFile,
     });
+
+    const ext = this.getExtension(relFile);
+    if (ext === '.md') {
+      await this.processMarkdownFile(relFile);
+    } else {
+      await this.processJsonFile(relFile);
+    }
+  }
+
+  private async processJsonFile(relFile: string) {
+    const content = await mfs.readTextFileAsync(this.makeSrcPath(relFile));
+    const config = JSON.parse(content) as JSONConfig;
+    if (config.mode === 'jmp') {
+      const gRelFile = rename(relFile, (pathObj: any) => {
+        pathObj.ext = FILE_JMP_EXT;
+      });
+      const dest = this.makeDestPath(gRelFile);
+      await mfs.writeFileAsync(dest, config.value || '/');
+    } else {
+      throw new Error(`Unsupported mode "${config.mode}" in JSON config file "${relFile}"`);
+    }
+  }
+
+  private async processMarkdownFile(relFile: string) {
     // write content.g.html
     await this.markdownToHTML(relFile);
 
@@ -58,20 +83,20 @@ export class Processor {
     });
     // check whether the dir already exists in cache
     if (dirCache[relDir]) {
-      this.logger.info('process-dir.found-in-cache', {
+      this.logger.warning('process-dir.found-in-cache', {
         relDir,
       });
       return dirCache[relDir] as PathComponent[];
     }
 
-    this.logger.info('process-dir.NOT-found-in-cache', {
+    this.logger.warning('process-dir.NOT-found-in-cache', {
       relDir,
     });
     // ****** create path bar ******
     const absDir = this.makeSrcPath(relDir);
     const curComponent = await this.pathComponentFromDir(absDir);
     const reversedComponents = [curComponent];
-    if (relDir !== '.' && await this.isRootDir(absDir) === false) {
+    if (relDir !== '.') {
       this.logger.info('process-dir.NOT-root', {
         relDir,
       });
@@ -121,9 +146,7 @@ export class Processor {
       this.logger.info('process-dir.list-subfiles.started', {
         absDir,
       });
-      let subfiles = await mfs.listSubFiles(absDir);
-      // remove ignored files
-      subfiles = subfiles.filter((file) => !this.ignoredFiles[file]);
+      const subfiles = await globby(nodepath.join(absDir, '*.md'));
       if (!subfiles.length) {
         throw new Error(`No files found in "${absDir}"`);
       }
@@ -161,11 +184,6 @@ export class Processor {
     dirCache[relDir] = reversedComponents;
 
     return reversedComponents;
-  }
-
-  private async isRootDir(dir: string): Promise<boolean> {
-    const rootFile = nodepath.join(dir, ROOTPROJ);
-    return await mfs.fileExists(rootFile);
   }
 
   private makeSrcPath(relFile: string): string {
@@ -267,5 +285,9 @@ export class Processor {
   /* internal helper methods */
   private get logger(): bb.Logger {
     return this.config.logger;
+  }
+
+  private getExtension(path: string): string {
+    return nodepath.extname(path).toLowerCase();
   }
 }
