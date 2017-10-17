@@ -12,7 +12,7 @@ export class PathComponent {
   attachedDisplayName: string;
   attachedDisplayNameHTML: string;
 
-  constructor(public name: string, public displayName: string) {
+  constructor(name: string, public displayName: string) {
     this.rawName = name;
     this.urlName = encodeURIComponent(name);
     this.displayNameHTML = escapeHTML(displayName);
