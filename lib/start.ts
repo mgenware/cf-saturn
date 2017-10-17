@@ -24,7 +24,7 @@ export async function start(config: Config, generator: ContentGenerator) {
 
   const processor = new core.Processor(config, generator);
   // only changed files will be processed
-  const files = await fx43.start(srcDir, '**/*.{md,json}', cacheDir);
+  const files = await fx43.start(srcDir, '**/*.{md,json}', cacheDir, config.forceWrite);
   logger.info('changed-files', {
     files,
   });

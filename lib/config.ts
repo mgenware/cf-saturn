@@ -3,6 +3,7 @@ import * as bb from 'barbary';
 export default class Config {
   logger: bb.Logger;
   escapeTitle: boolean = false;
+  forceWrite: boolean;
 
   constructor(
     public srcDir: string,
