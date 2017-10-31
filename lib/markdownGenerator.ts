@@ -1,16 +1,9 @@
-const Remarkable = require('remarkable');
+const Markdown = require('markdown-it-coldmark');
 const nodeRename = require('node-rename-path');
 
-const md = new Remarkable({
-  html:         false,        // Enable HTML tags in source
-  xhtmlOut:     true,        // Use '/' to close single tags (<br />)
-  breaks:       true,        // Convert '\n' in paragraphs into <br>
-  langPrefix:   'lang-',  // CSS language prefix for fenced blocks
-  linkify:      true,        // Autoconvert URL-like text to links
-});
-
+const coldmark = new Markdown('coldmark');
 export function convert(content: string): string {
-  return md.render(content);
+  return coldmark.render(content);
 }
 
 export function rename(file: string): string {

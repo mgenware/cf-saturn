@@ -45,9 +45,9 @@
     "globby": "^6.1.0",
     "lodash.trimend": "^4.5.1",
     "m-fs": "^0.0.1",
+    "markdown-it-coldmark": "^0.0.2",
     "mkdirp-promise": "^5.0.1",
     "node-filter-async": "^0.0.4",
-    "node-rename-path": "^1.0.0",
-    "remarkable": "^1.7.1"
+    "node-rename-path": "^1.0.0"
   }
 }
