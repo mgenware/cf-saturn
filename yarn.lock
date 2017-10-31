@@ -146,9 +146,9 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
 
-fx43@^0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/fx43/-/fx43-0.0.8.tgz#271aa1e2aeedf166a630b44e616ac83d2961c2f6"
+fx43@^0.0.11:
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/fx43/-/fx43-0.0.11.tgz#80a411da7bf14d85fbdec4722d56370b170828b6"
   dependencies:
     globby "^6.1.0"
     mkdirp-promise "^5.0.1"
@@ -266,6 +266,12 @@ ms@2.0.0:
 node-filter-async@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/node-filter-async/-/node-filter-async-0.0.3.tgz#130956768cf8d19c51f629977700c6758b2dc91d"
+  dependencies:
+    bluebird "^3.5.1"
+
+node-filter-async@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/node-filter-async/-/node-filter-async-0.0.4.tgz#6432dbae0f41ec93d97ecb179df4c2bbcb2d6c75"
   dependencies:
     bluebird "^3.5.1"
 
