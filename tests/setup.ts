@@ -34,5 +34,5 @@ const cache = nodepath.join(src, '../saturn/cache');
 const config = new saturn.Config(src, dest, cache);
 
 (async () => {
-  await saturn.start(config, new MyGenerator());
+  await saturn.startAsync(config, new MyGenerator());
 })();

@@ -1,9 +1,9 @@
-const main = require('../..').default;
+const main = require('../..');
 import * as fs from 'fs';
 
 describe('require this module', () => {
   test('Verify module members', () => {
-    expect(typeof main.validateFileAsync).toBe('function');
+    expect(typeof main.startAsync).toBe('function');
   });
 
   test('Verify type definition files', () => {

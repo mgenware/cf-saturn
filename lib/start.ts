@@ -5,7 +5,7 @@ import * as bluebird from 'bluebird';
 import Config from './config';
 import ContentGenerator from './contentGenerator';
 
-export async function start(config: Config, generator: ContentGenerator) {
+export async function startAsync(config: Config, generator: ContentGenerator) {
   if (!config) {
     throw new Error('config cannot be empty');
   }
