@@ -1,7 +1,7 @@
 export * from './start';
 export * from './eventArgs';
 export { default as ContentGenerator } from './contentGenerator';
-export * from 'barbary';
+export * from 'barbary-node';
 export { default as Config } from './config';
 
 /* tslint:disable:no-console */

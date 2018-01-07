@@ -1,7 +1,7 @@
-import * as bb from 'barbary';
+import * as bb from 'barbary-node';
 
 export default class Config {
-  logger: bb.Logger;
+  logger: bb.Logger|undefined;
   escapeTitle: boolean = false;
   forceWrite: boolean;
 

@@ -14,20 +14,26 @@ export async function start(config: Config, generator: ContentGenerator) {
   }
 
   let {srcDir, destDir, cacheDir} = config;
-  const {logger} = config;
+  const logger = config.logger;
   srcDir = nodepath.resolve(srcDir);
   destDir = nodepath.resolve(destDir);
   cacheDir = nodepath.resolve(cacheDir);
-  config.logger.info('main-started', {
-    srcDir, destDir, cacheDir,
-  });
+
+  if (logger) {
+    logger.logInfo('main-started', {
+      srcDir, destDir, cacheDir,
+    });
+  }
 
   const processor = new core.Processor(config, generator);
   // only changed files will be processed
-  const files = await fx43.start(srcDir, '**/*.{md,json}', cacheDir, config.forceWrite);
-  logger.info('changed-files', {
-    files,
-  });
+  const files = await fx43.start(srcDir, '**/*.md!(_*)', cacheDir, config.forceWrite);
+
+  if (logger) {
+    logger.logInfo('changed-files', {
+      files,
+    });
+  }
   return await bluebird.mapSeries(files, async (relFile) => {
     await processor.startFromFile(relFile);
   });

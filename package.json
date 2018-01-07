@@ -22,6 +22,7 @@
     "@types/node": "*",
     "copyfiles": "^1.2.0",
     "jest": "^22.0.4",
+    "tslint": "^5.8.0",
     "typescript": "*"
   },
   "scripts": {
@@ -40,13 +41,14 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
-    "barbary": "^0.0.3",
+    "barbary-node": "^1.2.0",
     "bluebird": "^3.5.1",
     "escape-html": "^1.0.3",
     "fx43": "^0.0.11",
+    "fx54-node": "^1.0.0",
     "globby": "^6.1.0",
     "lodash.trimend": "^4.5.1",
-    "m-fs": "^0.0.1",
+    "m-fs": "^1.0.1",
     "markdown-it-coldmark": "^0.0.2",
     "mkdirp-promise": "^5.0.1",
     "node-filter-async": "^0.0.4",

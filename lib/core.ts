@@ -2,7 +2,6 @@ import * as nodepath from 'path';
 import * as mfs from 'm-fs';
 import titleExtractor from './titleExtractor';
 import * as MarkdownGenerator from './markdownGenerator';
-import * as bb from 'barbary';
 import { PathComponent } from './eventArgs';
 import ContentGenerator from './contentGenerator';
 import Config from './config';
@@ -31,7 +30,7 @@ export class Processor {
   ) { }
 
   async startFromFile(relFile: string) {
-    this.logger.info('process-file', {
+    this.logInfo('process-file', {
       relFile,
     });
 
@@ -78,18 +77,18 @@ export class Processor {
     if (stackCount >= 100) {
       throw new Error('Potential infinite loop detected.');
     }
-    this.logger.info('process-dir.started', {
+    this.logInfo('process-dir.started', {
       relDir,
     });
     // check whether the dir already exists in cache
     if (dirCache[relDir]) {
-      this.logger.warning('process-dir.found-in-cache', {
+      this.logWarning('process-dir.found-in-cache', {
         relDir,
       });
       return dirCache[relDir] as PathComponent[];
     }
 
-    this.logger.warning('process-dir.NOT-found-in-cache', {
+    this.logWarning('process-dir.NOT-found-in-cache', {
       relDir,
     });
     // ****** create path bar ******
@@ -97,7 +96,7 @@ export class Processor {
     const curComponent = await this.pathComponentFromDir(absDir);
     const reversedComponents = [curComponent];
     if (relDir !== '.') {
-      this.logger.info('process-dir.NOT-root', {
+      this.logInfo('process-dir.NOT-root', {
         relDir,
       });
       // not a root directory, find all paths components upward
@@ -126,7 +125,7 @@ export class Processor {
     // save it to disk
     const destPathBarHtml = nodepath.join(this.makeDestPath(relDir), DIR_PATHBAR_HTML);
     const pathBarHtml = this.generator.generatePathBarHtml(reversedComponents.slice().reverse());
-    this.logger.info('process-dir.write-pathbar', {
+    this.logInfo('process-dir.write-pathbar', {
       relDir, destPathBarHtml,
     });
     await mfs.writeFileAsync(destPathBarHtml, pathBarHtml);
@@ -134,16 +133,16 @@ export class Processor {
     // ****** create content.html ******
     // there are two different content.html: dir only and file only
     // check directory type
-    this.logger.info('process-dir.leaf-dir-checking.started', {
+    this.logInfo('process-dir.leaf-dir-checking.started', {
       absDir,
     });
     const isLeafDir = await this.isLeafDir(absDir);
     let childComponents: PathComponent[];
-    this.logger.info('process-dir.leaf-dir-checking.ended', {
+    this.logInfo('process-dir.leaf-dir-checking.ended', {
       absDir, isLeafDir,
     });
     if (isLeafDir) {
-      this.logger.info('process-dir.list-subfiles.started', {
+      this.logInfo('process-dir.list-subfiles.started', {
         absDir,
       });
       const subfiles = await globby(nodepath.join(absDir, '*.md'));
@@ -152,7 +151,7 @@ export class Processor {
       }
       childComponents = await this.childComponentsFromFiles(subfiles);
     } else {
-      this.logger.info('process-dir.list-subdirs.started', {
+      this.logInfo('process-dir.list-subdirs.started', {
         absDir,
       });
       const subdirs = await mfs.listSubDirs(absDir);
@@ -171,7 +170,7 @@ export class Processor {
     const contentHtml = this.generator.generateContentHtml(childComponents);
     // write it to disk
     const contentPath = nodepath.join(this.makeDestPath(relDir), DIR_CONTENT_HTML);
-    this.logger.info('process-dir.write-contentHtml', {
+    this.logInfo('process-dir.write-contentHtml', {
       relDir, contentPath,
     });
     await mfs.writeFileAsync(contentPath, contentHtml);
@@ -196,7 +195,7 @@ export class Processor {
 
   /* internal methods for markdown to HTML */
   private async markdownToHTML(relFile: string) {
-    this.logger.info('markdown2html-start', {
+    this.logInfo('markdown2html-start', {
       relFile,
     });
     // read the content of file
@@ -205,7 +204,7 @@ export class Processor {
     const html = MarkdownGenerator.convert(content);
     // write to file
     const htmlFile = MarkdownGenerator.rename(this.makeDestPath(relFile));
-    this.logger.info('markdown2html-write', {
+    this.logInfo('markdown2html-write', {
       htmlFile,
     });
     await mfs.writeFileAsync(htmlFile, html);
@@ -213,7 +212,7 @@ export class Processor {
 
   /* internal methods for pathBar generation */
   private async pathComponentFromDir(dir: string): Promise<PathComponent> {
-    this.logger.verbose('pathComponentFromDir', {
+    this.logVerbose('pathComponentFromDir', {
       dir,
     });
     const dirName = nodepath.basename(dir);
@@ -222,7 +221,7 @@ export class Processor {
 
     const attachedTitle = await titleExtractor.attachedTitleFromDir(dir);
     if (attachedTitle) {
-      this.logger.verbose('pathComponentFromDir.found-attached-title', {
+      this.logVerbose('pathComponentFromDir.found-attached-title', {
         dir, attachedTitle,
       });
       component.sourceOfAttachedName = true;
@@ -233,7 +232,7 @@ export class Processor {
   }
 
   private async pathComponentFromFile(file: string): Promise<PathComponent> {
-    this.logger.verbose('pathComponentFromFile', {
+    this.logVerbose('pathComponentFromFile', {
       file,
     });
     const name = nodepath.parse(file).name;
@@ -283,11 +282,26 @@ export class Processor {
   }
 
   /* internal helper methods */
-  private get logger(): bb.Logger {
-    return this.config.logger;
-  }
 
   private getExtension(path: string): string {
     return nodepath.extname(path).toLowerCase();
+  }
+
+  private logInfo(category: string, data: any) {
+    if (this.config.logger) {
+      this.config.logger.logInfo(category, data);
+    }
+  }
+
+  private logVerbose(category: string, data: any) {
+    if (this.config.logger) {
+      this.config.logger.logVerbose(category, data);
+    }
+  }
+
+  private logWarning(category: string, data: any) {
+    if (this.config.logger) {
+      this.config.logger.logWarning(category, data);
+    }
   }
 }
