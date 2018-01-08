@@ -8,7 +8,7 @@ export default class Config {
   constructor(
     public srcDir: string,
     public destDir: string,
-    public cacheDir: string|null,
+    public cacheDir: string,
   ) {
     this.validateParameter(srcDir, 'srcDir');
     this.validateParameter(destDir, 'destDir');

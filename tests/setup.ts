@@ -1,8 +1,9 @@
-import * as nodepath from 'path';
 import * as saturn from '../lib/main';
+export { default as validator } from 'fx54-node';
+import * as tmp from 'tmp';
 
-export function resolve(path: string = ''): string {
-  return `dist/tests/saturn/dist/${path}`;
+export function resolve(name: string): string {
+  return `dist/tests/saturn/dist/${name}`;
 }
 
 class MyGenerator extends saturn.ContentGenerator {
@@ -28,11 +29,9 @@ class MyGenerator extends saturn.ContentGenerator {
   }
 }
 
-const src = 'dist/tests/data';
-const dest = nodepath.join(src, '../saturn/dist');
-const cache = nodepath.join(src, '../saturn/cache');
-const config = new saturn.Config(src, dest, cache);
-
-(async () => {
+export async function startAsync(name: string) {
+  const src = `dist/tests/data/${name}`;
+  const dest = resolve(name);
+  const config = new saturn.Config(src, dest, tmp.dirSync().name);
   await saturn.startAsync(config, new MyGenerator());
-})();
+}

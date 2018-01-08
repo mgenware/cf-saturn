@@ -1,8 +1,11 @@
 import * as base from './setup';
-import validator from 'fx54-node';
 
-test('markdown', async () => {
-  await expect(validator.validateDirectoryAsync(base.resolve('markdown'), {
-    'a.html': '<h1>title</h1>',
-  }));
+beforeAll(async () => {
+  await base.startAsync('markdown');
+});
+
+test('main', async () => {
+  await expect(base.validator.validateDirectoryAsync(base.resolve('markdown/a/'), {
+    'a.g.html': '<h1>title</h1>\n<p><code>a</code>b</p>\n',
+  })).resolves.toBeUndefined();
 });
