@@ -1,16 +1,9 @@
 import * as mfs from 'm-fs';
 import * as nodepath from 'path';
+import * as defs from 'defs';
 const trimEnd = require('lodash.trimend') as any;
 
 export default class TitleExtractor {
-  static get TITLE_FILE(): string {
-    return 't.txt';
-  }
-
-  static get ATTACHED_TITLE_FILE(): string {
-    return 't_attached.txt';
-  }
-
   static async fromFile(file: string): Promise<string> {
     const content = await mfs.readTextFileAsync(file);
     return this.fromFileContent(content, file);
@@ -28,7 +21,7 @@ export default class TitleExtractor {
 
   static async fromDir(dir: string): Promise<string> {
     // check dir/t.txt
-    const file = nodepath.join(dir, this.TITLE_FILE);
+    const file = nodepath.join(dir, defs.TitleFile);
     let displayTitle: string = '';
     if (await mfs.fileExists(file)) {
       displayTitle = await mfs.readTextFileAsync(file);
@@ -40,7 +33,7 @@ export default class TitleExtractor {
   }
 
   static async attachedTitleFromDir(dir: string): Promise<string|null> {
-    const file = nodepath.join(dir, this.ATTACHED_TITLE_FILE);
+    const file = nodepath.join(dir, defs.AttachedTitleFile);
     if (await mfs.fileExists(file)) {
       const title = await mfs.readTextFileAsync(file);
       return trimEnd(title);
