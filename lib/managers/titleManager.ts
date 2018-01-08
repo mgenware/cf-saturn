@@ -1,15 +1,15 @@
 import * as mfs from 'm-fs';
 import * as nodepath from 'path';
-import * as defs from 'defs';
+import defs from '../defs';
 const trimEnd = require('lodash.trimend') as any;
 
-export default class TitleExtractor {
-  static async fromFile(file: string): Promise<string> {
+export class TitleManager {
+  async getFromFileAsync(file: string): Promise<string> {
     const content = await mfs.readTextFileAsync(file);
-    return this.fromFileContent(content, file);
+    return await this.getFromFileContentAsync(content, file);
   }
 
-  static fromFileContent(content: string, logFile: string): string {
+  async getFromFileContentAsync(content: string, logFile: string): Promise<string> {
     const firstLine = content.split('\n').shift();
     if (!firstLine) {
       throw new Error(`Cannot find a valid title in file: "${logFile}"`);
@@ -19,7 +19,7 @@ export default class TitleExtractor {
     return title.trim();
   }
 
-  static async fromDir(dir: string): Promise<string> {
+  async getFromDirAsync(dir: string): Promise<string> {
     // check dir/t.txt
     const file = nodepath.join(dir, defs.TitleFile);
     let displayTitle: string = '';
@@ -32,7 +32,7 @@ export default class TitleExtractor {
     return displayTitle.trim();
   }
 
-  static async attachedTitleFromDir(dir: string): Promise<string|null> {
+  async getAttachedTitleFromDirAsync(dir: string): Promise<string|null> {
     const file = nodepath.join(dir, defs.AttachedTitleFile);
     if (await mfs.fileExists(file)) {
       const title = await mfs.readTextFileAsync(file);
@@ -41,3 +41,5 @@ export default class TitleExtractor {
     return null;
   }
 }
+
+export default new TitleManager();

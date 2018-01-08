@@ -1,11 +1,12 @@
 import * as nodepath from 'path';
 import * as mfs from 'm-fs';
-import titleExtractor from './titleExtractor';
-import * as MarkdownGenerator from './markdownGenerator';
-import { PathComponent } from './eventArgs';
-import ContentGenerator from './contentGenerator';
-import Config from './config';
+import TitleManager from '../managers/titleManager';
+import * as MarkdownManager from '../managers/markdownManager';
+import { PathComponent } from '../eventArgs';
+import ContentGenerator from '../contentGenerator';
+import Config from '../config';
 import * as globby from 'globby';
+import titleManager from '../managers/titleManager';
 const rename = require('node-rename-path');
 const escapeHTML = require('escape-html') as any;
 
@@ -22,8 +23,6 @@ class JSONConfig {
 }
 
 export class Processor {
-  ignoredFiles: { [key: string]: boolean|null } = {};
-
   constructor(
     public config: Config,
     public generator: ContentGenerator,
@@ -69,7 +68,7 @@ export class Processor {
     const dirComponent = components[0];
 
     // write t.g.html
-    const title = await titleExtractor.fromFile(this.makeSrcPath(relFile));
+    const title = await TitleManager.getFromFileAsync(this.makeSrcPath(relFile));
     await this.writeTitleFileForFile(relFile, title, dirComponent.tryGetAttachedName());
   }
 
@@ -176,7 +175,7 @@ export class Processor {
     await mfs.writeFileAsync(contentPath, contentHtml);
 
     // ****** create t.html ******
-    const title = await titleExtractor.fromDir(absDir);
+    const title = await TitleManager.getFromDirAsync(absDir);
     await this.writeTitleFileForDir(relDir, title, curComponent.tryGetAttachedName());
 
     // add it to cache, marking as processed
@@ -201,9 +200,9 @@ export class Processor {
     // read the content of file
     const content = await mfs.readTextFileAsync(this.makeSrcPath(relFile));
     // generate markdown
-    const html = MarkdownGenerator.convert(content);
+    const html = MarkdownManager.convert(content);
     // write to file
-    const htmlFile = MarkdownGenerator.rename(this.makeDestPath(relFile));
+    const htmlFile = MarkdownManager.rename(this.makeDestPath(relFile));
     this.logInfo('markdown2html-write', {
       htmlFile,
     });
@@ -216,10 +215,10 @@ export class Processor {
       dir,
     });
     const dirName = nodepath.basename(dir);
-    const title = await titleExtractor.fromDir(dir);
+    const title = await TitleManager.getFromDirAsync(dir);
     const component = new PathComponent(dirName, title);
 
-    const attachedTitle = await titleExtractor.attachedTitleFromDir(dir);
+    const attachedTitle = await TitleManager.getAttachedTitleFromDirAsync(dir);
     if (attachedTitle) {
       this.logVerbose('pathComponentFromDir.found-attached-title', {
         dir, attachedTitle,
@@ -236,7 +235,7 @@ export class Processor {
       file,
     });
     const name = nodepath.parse(file).name;
-    const title = await titleExtractor.fromFile(file);
+    const title = await titleManager.getFromFileAsync(file);
     return new PathComponent(name, title);
   }
 

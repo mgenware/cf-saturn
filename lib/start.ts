@@ -1,6 +1,6 @@
 import * as nodepath from 'path';
 import * as fx43 from 'fx43';
-import * as core from './core';
+import * as core from './processor/core';
 import * as bluebird from 'bluebird';
 import Config from './config';
 import ContentGenerator from './contentGenerator';

@@ -1,2 +1,6 @@
-export const TitleFile = 't.txt';
-export const AttachedTitleFile = 't_attached.txt';
+export default {
+  TitleFile: 't.txt',
+  AttachedTitleFile: 't_attached.txt',
+
+  GeneratedHTMLExt: '.g.html',
+};
