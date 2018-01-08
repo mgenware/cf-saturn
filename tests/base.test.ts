@@ -1,4 +1,4 @@
-import * as base from './setup';
+import * as base from './helper/setup';
 import validator from 'fx54-node';
 
 beforeAll(async () => {

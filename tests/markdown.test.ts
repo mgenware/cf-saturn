@@ -1,4 +1,4 @@
-import * as base from './setup';
+import * as base from './helper/setup';
 
 beforeAll(async () => {
   await base.startAsync('markdown');

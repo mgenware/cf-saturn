@@ -1,4 +1,4 @@
-import * as saturn from '../lib/main';
+import * as saturn from '../../lib/main';
 export { default as validator } from 'fx54-node';
 import * as tmp from 'tmp';
 
