@@ -1,12 +1,13 @@
 import * as nodepath from 'path';
 import * as mfs from 'm-fs';
-import TitleManager from '../managers/titleManager';
-import * as MarkdownManager from '../managers/markdownManager';
+import TitleManager from './managers/titleManager';
+import MarkdownManager from './managers/markdownManager';
+import PathManager from './managers/pathManager';
 import { PathComponent } from '../eventArgs';
 import ContentGenerator from '../contentGenerator';
 import Config from '../config';
+import State from './state';
 import * as globby from 'globby';
-import titleManager from '../managers/titleManager';
 const rename = require('node-rename-path');
 const escapeHTML = require('escape-html') as any;
 
@@ -23,10 +24,22 @@ class JSONConfig {
 }
 
 export class Processor {
+  titleManager: TitleManager;
+  markdownManager: MarkdownManager;
+  pathManager: PathManager;
+
+  state: State;
+
   constructor(
     public config: Config,
     public generator: ContentGenerator,
-  ) { }
+  ) {
+    this.titleManager = new TitleManager();
+    this.markdownManager = new MarkdownManager();
+    this.pathManager = new PathManager(config);
+
+    this.state = new State(config);
+  }
 
   async startFromFile(relFile: string) {
     this.logInfo('process-file', {
@@ -42,39 +55,22 @@ export class Processor {
   }
 
   private async processJsonFile(relFile: string) {
-    const content = await mfs.readTextFileAsync(this.makeSrcPath(relFile));
+    const content = await mfs.readTextFileAsync(this.pathManager.getSrcPath(relFile));
     const config = JSON.parse(content) as JSONConfig;
     if (config.mode === 'jmp') {
       const gRelFile = rename(relFile, (pathObj: any) => {
         pathObj.ext = FILE_JMP_EXT;
       });
-      const dest = this.makeDestPath(gRelFile);
+      const dest = this.pathManager.getDestPath(gRelFile);
       await mfs.writeFileAsync(dest, config.value || '/');
     } else {
       throw new Error(`Unsupported mode "${config.mode}" in JSON config file "${relFile}"`);
     }
   }
 
-  private async processMarkdownFile(relFile: string) {
-    // write content.g.html
-    await this.markdownToHTML(relFile);
-
-    // process parent dir
-    const relDir = nodepath.dirname(relFile);
-    const components = await this.processDir(relDir, 1);
-    if (!components.length) {
-      throw new Error('Internal error: components should not be empty');
-    }
-    const dirComponent = components[0];
-
-    // write t.g.html
-    const title = await TitleManager.getFromFileAsync(this.makeSrcPath(relFile));
-    await this.writeTitleFileForFile(relFile, title, dirComponent.tryGetAttachedName());
-  }
-
   private async processDir(relDir: string, stackCount: number): Promise<PathComponent[]> {
     if (stackCount >= 100) {
-      throw new Error('Potential infinite loop detected.');
+      throw new Error('Possible infinite loop detected.');
     }
     this.logInfo('process-dir.started', {
       relDir,
@@ -91,7 +87,7 @@ export class Processor {
       relDir,
     });
     // ****** create path bar ******
-    const absDir = this.makeSrcPath(relDir);
+    const absDir = this.pathManager.getSrcPath(relDir);
     const curComponent = await this.pathComponentFromDir(absDir);
     const reversedComponents = [curComponent];
     if (relDir !== '.') {
@@ -122,7 +118,7 @@ export class Processor {
     }
 
     // save it to disk
-    const destPathBarHtml = nodepath.join(this.makeDestPath(relDir), DIR_PATHBAR_HTML);
+    const destPathBarHtml = nodepath.join(this.pathManager.getDestPath(relDir), DIR_PATHBAR_HTML);
     const pathBarHtml = this.generator.generatePathBarHtml(reversedComponents.slice().reverse());
     this.logInfo('process-dir.write-pathbar', {
       relDir, destPathBarHtml,
@@ -168,14 +164,14 @@ export class Processor {
     // generate the content.g.html
     const contentHtml = this.generator.generateContentHtml(childComponents);
     // write it to disk
-    const contentPath = nodepath.join(this.makeDestPath(relDir), DIR_CONTENT_HTML);
+    const contentPath = nodepath.join(this.pathManager.getDestPath(relDir), DIR_CONTENT_HTML);
     this.logInfo('process-dir.write-contentHtml', {
       relDir, contentPath,
     });
     await mfs.writeFileAsync(contentPath, contentHtml);
 
     // ****** create t.html ******
-    const title = await TitleManager.getFromDirAsync(absDir);
+    const title = await this.titleManager.getFromDirAsync(absDir);
     await this.writeTitleFileForDir(relDir, title, curComponent.tryGetAttachedName());
 
     // add it to cache, marking as processed
@@ -184,30 +180,8 @@ export class Processor {
     return reversedComponents;
   }
 
-  private makeSrcPath(relFile: string): string {
-    return nodepath.join(this.config.srcDir, relFile);
-  }
-
-  private makeDestPath(relFile: string): string {
-    return nodepath.join(this.config.destDir, relFile);
-  }
-
   /* internal methods for markdown to HTML */
-  private async markdownToHTML(relFile: string) {
-    this.logInfo('markdown2html-start', {
-      relFile,
-    });
-    // read the content of file
-    const content = await mfs.readTextFileAsync(this.makeSrcPath(relFile));
-    // generate markdown
-    const html = MarkdownManager.convert(content);
-    // write to file
-    const htmlFile = MarkdownManager.rename(this.makeDestPath(relFile));
-    this.logInfo('markdown2html-write', {
-      htmlFile,
-    });
-    await mfs.writeFileAsync(htmlFile, html);
-  }
+
 
   /* internal methods for pathBar generation */
   private async pathComponentFromDir(dir: string): Promise<PathComponent> {
@@ -215,10 +189,10 @@ export class Processor {
       dir,
     });
     const dirName = nodepath.basename(dir);
-    const title = await TitleManager.getFromDirAsync(dir);
+    const title = await this.titleManager.getFromDirAsync(dir);
     const component = new PathComponent(dirName, title);
 
-    const attachedTitle = await TitleManager.getAttachedTitleFromDirAsync(dir);
+    const attachedTitle = await this.titleManager.getAttachedTitleFromDirAsync(dir);
     if (attachedTitle) {
       this.logVerbose('pathComponentFromDir.found-attached-title', {
         dir, attachedTitle,
@@ -235,7 +209,7 @@ export class Processor {
       file,
     });
     const name = nodepath.parse(file).name;
-    const title = await titleManager.getFromFileAsync(file);
+    const title = await this.titleManager.getFromFileAsync(file);
     return new PathComponent(name, title);
   }
 
@@ -259,17 +233,11 @@ export class Processor {
   }
 
   /* internal methods for title generation */
-  private async writeTitleFileForFile(relFile: string, title: string, attached: string) {
-    const html = this.tryEscapeTitle(title + (attached || ''));
-    const gRelFile = rename(relFile, (pathObj: any) => {
-      pathObj.ext = FILE_TITLE_EXT;
-    });
-    await mfs.writeFileAsync(this.makeDestPath(gRelFile), html);
-  }
+
 
   private async writeTitleFileForDir(relDir: string, title: string, attached: string) {
     const html = this.tryEscapeTitle(title + (attached || ''));
-    const dest = nodepath.join(this.makeDestPath(relDir), DIR_TITLE_HTML);
+    const dest = nodepath.join(this.pathManager.getDestPath(relDir), DIR_TITLE_HTML);
     await mfs.writeFileAsync(dest, html);
   }
 

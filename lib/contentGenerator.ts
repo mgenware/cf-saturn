@@ -1,4 +1,4 @@
-import { PathComponent } from './eventArgs';
+import PathComponent from './pathComponent';
 
 export default class ContentGenerator {
   generatePathBarHtml(items: PathComponent[]): string {

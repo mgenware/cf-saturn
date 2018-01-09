@@ -1,16 +1,12 @@
 import * as nodepath from 'path';
 const escapeHTML = require('escape-html') as any;
 
-export class PathComponent {
+export default class PathComponent {
   urlName: string;
   displayNameHTML: string;
   rawName: string;
 
   fullURL: string;
-
-  sourceOfAttachedName: boolean;
-  attachedDisplayName: string;
-  attachedDisplayNameHTML: string;
 
   constructor(name: string, public displayName: string) {
     this.rawName = name;
@@ -25,12 +21,5 @@ export class PathComponent {
     } else {
       this.fullURL = '/' + this.urlName;
     }
-  }
-
-  tryGetAttachedName(): string {
-    if (!this.sourceOfAttachedName) {
-      return this.attachedDisplayName;
-    }
-    return '';
   }
 }
