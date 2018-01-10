@@ -18,9 +18,12 @@ export default class PathBarProcessor implements IProcessor {
 
   async process(relFile: string, state: State): Promise<void> {
     const relDir = this.pathManager.basePath(relFile);
-    const pathBar = await this.pathBarManager.pathBar(relDir);
+    const pathBarResult = await this.pathBarManager.pathBar(relDir);
 
-    const pathBarHTML = state.contentGenerator.generatePathBarHtml(pathBar);
+    if (pathBarResult.isCached) {
+      return;
+    }
+    const pathBarHTML = state.contentGenerator.generatePathBarHtml(pathBarResult.result);
     const pathBarFile = this.pathManager.joinedDestPath(relDir, defs.GeneratedPathBarFile);
     await mfs.writeFileAsync(pathBarFile, pathBarHTML);
   }

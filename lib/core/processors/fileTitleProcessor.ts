@@ -18,8 +18,8 @@ export default class FileTitleProcessor implements IProcessor {
   }
 
   async process(relFile: string, state: State): Promise<void> {
-    const title = await this.attachedTitleManager.calculatedTitleForFileAsync(relFile);
-    await this.writeTitleFileForFileAsync(relFile, title);
+    const titleResult = await this.attachedTitleManager.calculatedTitleForFileAsync(relFile);
+    await this.writeTitleFileForFileAsync(relFile, titleResult.result);
   }
 
   private async writeTitleFileForFileAsync(relFile: string, title: string) {
