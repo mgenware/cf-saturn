@@ -1,7 +1,7 @@
 import * as nodepath from 'path';
 const escapeHTML = require('escape-html') as any;
 
-export default class PathComponent {
+export default class PathInfo {
   urlName: string;
   displayNameHTML: string;
   rawName: string;

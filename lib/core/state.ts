@@ -1,4 +1,4 @@
-import PathComponent from '../pathComponent';
+import PathInfo from '../pathInfo';
 export class SeoTitleData {
   constructor(
     public calculatedTitle: string,
@@ -20,6 +20,9 @@ export class State {
   fileTitle: { [key: string]: string} = {};
 
   // --- PathBar ---
-  dirPathComponent: { [key: string]: PathComponent } = {};
-  dirPathBar: { [key: string]: PathComponent[] } = {};
+  dirPathInfo: { [key: string]: PathInfo } = {};
+  dirPathBar: { [key: string]: PathInfo[] } = {};
+
+  // -- File list ---
+  dirChildList: { [key: string]: PathInfo[] } = {};
 }

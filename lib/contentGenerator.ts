@@ -1,11 +1,11 @@
-import PathComponent from './pathComponent';
+import PathInfo from './pathInfo';
 
 export default class ContentGenerator {
-  generatePathBarHtml(items: PathComponent[]): string {
+  generatePathBarHtml(items: PathInfo[]): string {
     throw new Error(`Not implemented yet: ${JSON.stringify(items)}`);
   }
 
-  generateContentHtml(items: PathComponent[]): string {
+  generateContentHtml(items: PathInfo[]): string {
     throw new Error(`Not implemented yet: ${JSON.stringify(items)}`);
   }
 }

@@ -2,7 +2,7 @@ import * as nodepath from 'path';
 import * as saturn from '../lib/main';
 
 class MyGenerator extends saturn.ContentGenerator {
-  generatePathBarHtml(items: saturn.PathComponent[]): string {
+  generatePathBarHtml(items: saturn.PathInfo[]): string {
     let html = '';
     for (const item of items) {
       html += this.makeATag(item.displayNameHTML, item.fullURL);
@@ -10,7 +10,7 @@ class MyGenerator extends saturn.ContentGenerator {
     return html;
   }
 
-  generateContentHtml(items: saturn.PathComponent[]): string {
+  generateContentHtml(items: saturn.PathInfo[]): string {
     let html = '<div class="k-content"><ul>';
     for (const item of items) {
       html += this.makeATag(item.displayNameHTML, item.fullURL);

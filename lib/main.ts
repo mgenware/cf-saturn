@@ -1,5 +1,5 @@
 export * from './start';
-export { default as PathComponent } from './pathComponent';
+export { default as PathInfo } from './pathInfo';
 export { default as ContentGenerator } from './contentGenerator';
 export * from 'barbary-node';
 export { default as Config } from './config';

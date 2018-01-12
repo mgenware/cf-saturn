@@ -2,7 +2,7 @@ import Config from '../../config';
 import PathManager from './pathManager';
 import TitleManager from './titleManager';
 import { State } from '../state';
-import PathComponent from '../../pathComponent';
+import PathInfo from '../../pathInfo';
 import { Result } from './common';
 import ContentGenerator from '../../contentGenerator';
 import defs from '../../defs';
@@ -17,7 +17,7 @@ export default class PathBarManager {
     public contentGenerator: ContentGenerator,
   ) {}
 
-  async updatePathBar(relDir: string): Promise<Result<PathComponent[]>> {
+  async updatePathBar(relDir: string): Promise<Result<PathInfo[]>> {
     // required for recursion termination
     if (!relDir) {
       return new Result([], false);
@@ -43,18 +43,18 @@ export default class PathBarManager {
     return new Result(paths, false);
   }
 
-  private async componentFromDir(relDir: string): Promise<Result<PathComponent>> {
+  private async componentFromDir(relDir: string): Promise<Result<PathInfo>> {
     const state = this.state;
-    if (state.dirPathComponent[relDir]) {
-      return new Result(state.dirPathComponent[relDir], true);
+    if (state.dirPathInfo[relDir]) {
+      return new Result(state.dirPathInfo[relDir], true);
     }
 
     const name = this.pathManager.name(relDir);
     const title = (await this.titleManager.updateDirTitleAsync(relDir, false)).result;
 
     // add to cache
-    const component = new PathComponent(name, title);
-    state.dirPathComponent[relDir] = component;
+    const component = new PathInfo(name, title);
+    state.dirPathInfo[relDir] = component;
 
     return new Result(component, false);
   }
