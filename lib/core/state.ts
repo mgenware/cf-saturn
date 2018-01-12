@@ -1,18 +1,25 @@
-import Config from '../config';
-import PathComponent from 'pathComponent';
-import ContentGenerator from 'contentGenerator';
+import PathComponent from '../pathComponent';
+export class SeoTitleData {
+  constructor(
+    public calculatedTitle: string,
+    public inheritedTitle: string,
+  ) {}
+}
 
 export class State {
-  attachedDirTitle: { [key: string]: string} = {};
-  calculatedDirTitle: { [key: string]: string } = {};
-  calculatedFileTitle: { [key: string]: string } = {};
-  dirTitle: { [key: string]: string} = {};
-  fileTitle: { [key: string]: string} = {};
-  dirPathComponent: { [key: string]: PathComponent } = {}
-  dirPathBar: { [key: string]: PathComponent[] } = {};
+  // --- SEO Title ---
+  // the calculated title for a directory
+  dirSeoTitle: { [key: string]: SeoTitleData} = {};
+  // the calculated title for a file
+  fileSeoTitle: { [key: string]: SeoTitleData } = {};
 
-  constructor(
-    public config: Config,
-    public contentGenerator: ContentGenerator,
-  ) {}
+  // --- Title ---
+  // the explicitly set title for a directory
+  dirTitle: { [key: string]: string} = {};
+  // the explicitly set title for a file
+  fileTitle: { [key: string]: string} = {};
+
+  // --- PathBar ---
+  dirPathComponent: { [key: string]: PathComponent } = {};
+  dirPathBar: { [key: string]: PathComponent[] } = {};
 }

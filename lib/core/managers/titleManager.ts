@@ -3,7 +3,10 @@ import * as nodepath from 'path';
 import defs from '../../defs';
 import { State } from '../state';
 import PathManager from './pathManager';
-const trimEnd = require('lodash.trimend') as any;
+import { Result } from './common';
+import Config from '../../config';
+const escapeHTML = require('escape-html') as any;
+import rename from 'node-rename-path';
 
 class TitleExtractor {
   static async titleFromFileAsync(absFile: string): Promise<string> {
@@ -23,7 +26,7 @@ class TitleExtractor {
 
   static async titleFromDirAsync(absDir: string): Promise<string> {
     // check dir/t.txt
-    const file = nodepath.join(absDir, defs.TitleFile);
+    const file = nodepath.join(absDir, defs.src.titleFile);
     let displayTitle: string = '';
     if (await mfs.fileExists(file)) {
       displayTitle = await mfs.readTextFileAsync(file);
@@ -33,50 +36,74 @@ class TitleExtractor {
     }
     return displayTitle.trim();
   }
-
-  static async attachedTitleFromDirAsync(absDir: string): Promise<string|null> {
-    const file = nodepath.join(absDir, defs.AttachedTitleFile);
-    if (await mfs.fileExists(file)) {
-      const title = await mfs.readTextFileAsync(file);
-      return trimEnd(title);
-    }
-    return null;
-  }
 }
 
 export default class TitleManager {
   constructor(
+    public config: Config,
     public state: State,
     public pathManager: PathManager,
   ) {}
 
-  async titleFromFileAsync(relFile: string): Promise<string> {
+  async updateFileTitleAsync(relFile: string): Promise<Result<string>> {
     const state = this.state;
     if (state.fileTitle[relFile]) {
-      return state.fileTitle[relFile];
+      return new Result(state.fileTitle[relFile], true);
     }
 
     const path = this.pathManager.srcPath(relFile);
-    return TitleExtractor.titleFromFileAsync(path);
+    const title = await TitleExtractor.titleFromFileAsync(path);
+
+    // add to cache
+    state.fileTitle[relFile] = title;
+
+    // write to file
+    const destFile = rename(this.pathManager.destPath(relFile), (_) => {
+      return { ext: defs.dest.titleExt };
+    });
+    await this.writeTitleFile(destFile, title);
+
+    return new Result(title, false);
   }
 
-  async titleFromDirAsync(relDir: string): Promise<string> {
+  async updateDirTitleAsync(relDir: string, recursive: boolean): Promise<Result<string>> {
+    // required for recursion termination
+    if (!relDir) {
+      return new Result('', false);
+    }
+
     const state = this.state;
     if (state.dirTitle[relDir]) {
-      return state.dirTitle[relDir];
+      return new Result(state.dirTitle[relDir], true);
     }
 
     const path = this.pathManager.srcPath(relDir);
-    return await TitleExtractor.titleFromDirAsync(path);
+    const title = await TitleExtractor.titleFromDirAsync(path);
+
+    // add to cache
+    state.dirTitle[relDir] = title;
+
+    // write to file
+    const destFile = this.pathManager.joinedDestPath(relDir, defs.dest.dirTitleFile);
+    await this.writeTitleFile(destFile, title);
+
+    if (recursive) {
+      const parentDir = this.pathManager.basePath(relDir);
+      await this.updateDirTitleAsync(parentDir, true);
+    }
+
+    return new Result(title, false);
   }
 
-  async attachedTitleFromDirAsync(relDir: string): Promise<string|null> {
-    const state = this.state;
-    if (state.attachedDirTitle[relDir]) {
-      return state.attachedDirTitle[relDir];
-    }
+  private writeTitleFile(absPath: string, title: string): Promise<void> {
+    const content = this.tryEscapeTitle(title);
+    return mfs.writeFileAsync(absPath, content);
+  }
 
-    const path = this.pathManager.srcPath(relDir);
-    return await TitleExtractor.attachedTitleFromDirAsync(path);
+  private tryEscapeTitle(title: string): string {
+    if (this.config.escapeTitle) {
+      return escapeHTML(title);
+    }
+    return title;
   }
 }

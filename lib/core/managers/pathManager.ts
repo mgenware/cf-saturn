@@ -12,6 +12,10 @@ export default class PathManager {
     return nodepath.join(this.config.destDir, relFile);
   }
 
+  joinedSrcPath(path1: string, path2: string): string {
+    return nodepath.join(this.srcPath(path1), path2);
+  }
+
   joinedDestPath(path1: string, path2: string): string {
     return nodepath.join(this.destPath(path1), path2);
   }

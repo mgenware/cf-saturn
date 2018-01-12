@@ -34,7 +34,7 @@ export async function startAsync(config: Config, generator: ContentGenerator) {
       files,
     });
   }
-  return await bluebird.mapSeries(files, async (relFile) => {
-    await processor.startFromFile(relFile);
+  return await bluebird.mapSeries(files, (relFile) => {
+    return processor.startFromFile(relFile);
   });
 }
