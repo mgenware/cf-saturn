@@ -51,7 +51,7 @@
     "fx54-node": "^1.0.2",
     "lodash.trimend": "^4.5.1",
     "m-fs": "^1.0.1",
-    "markdown-it-coldmark": "^0.0.2",
+    "markdown-it-coldmark": "^0.0.4",
     "micromatch": "^3.1.5",
     "mkdirp-promise": "^5.0.1",
     "node-filter-async": "^0.0.4",
