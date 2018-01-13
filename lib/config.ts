@@ -3,7 +3,6 @@ import * as nodepath from 'path';
 
 export default class Config {
   logger: bb.Logger|undefined;
-  escapeTitle : boolean   = true;
   rootURL: string         = '';
   forceWrite: boolean     = false;
 

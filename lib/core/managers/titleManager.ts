@@ -58,10 +58,7 @@ export default class TitleManager {
     state.fileTitle[relFile] = title;
 
     // write to file
-    const destFile = rename(this.pathManager.destPath(relFile), (_) => {
-      return { ext: defs.dest.titleExt };
-    });
-    await this.writeTitleFile(destFile, title);
+    await this.writeFileTitleFile(relFile, title);
 
     return new Result(title, false);
   }
@@ -84,8 +81,7 @@ export default class TitleManager {
     state.dirTitle[relDir] = title;
 
     // write to file
-    const destFile = this.pathManager.joinedDestPath(relDir, defs.dest.dirTitleFile);
-    await this.writeTitleFile(destFile, title);
+    await this.writeDirTitleFile(relDir, title);
 
     if (recursive) {
       const parentDir = this.pathManager.basePath(relDir);
@@ -95,15 +91,27 @@ export default class TitleManager {
     return new Result(title, false);
   }
 
-  private writeTitleFile(absPath: string, title: string): Promise<void> {
-    const content = this.tryEscapeTitle(title);
-    return mfs.writeFileAsync(absPath, content);
+  private async writeFileTitleFile(relFile: string, title: string): Promise<void> {
+    // unescaped
+    const unescapedFile = rename(this.pathManager.destPath(relFile), (_) => {
+      return { ext: defs.dest.titleExt };
+    });
+    await mfs.writeFileAsync(unescapedFile, title);
+
+    // escaped
+    const escapedFile = rename(this.pathManager.destPath(relFile), (_) => {
+      return { ext: defs.dest.titleHtmlExt };
+    });
+    await mfs.writeFileAsync(escapedFile, escapeHTML(title));
   }
 
-  private tryEscapeTitle(title: string): string {
-    if (this.config.escapeTitle) {
-      return escapeHTML(title);
-    }
-    return title;
+  private async writeDirTitleFile(relDir: string, title: string): Promise<void> {
+    // unescaped
+    const unescapedFile = this.pathManager.joinedDestPath(relDir, defs.dest.dirTitleFile);
+    await mfs.writeFileAsync(unescapedFile, title);
+
+    // escaped
+    const escapedFile = this.pathManager.joinedDestPath(relDir, defs.dest.dirTitleHtmlFile);
+    await mfs.writeFileAsync(escapedFile, escapeHTML(title));
   }
 }

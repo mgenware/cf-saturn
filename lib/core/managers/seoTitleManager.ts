@@ -26,17 +26,14 @@ export default class SeoTitleManager {
     const baseDir = this.pathManager.basePath(relFile);
     const inheritedSeoTitle = (await this.updateSeoTitleForDir(baseDir)).result.inheritedTitle;
     const title = (await this.titleManager.updateFileTitleAsync(relFile)).result;
-    const calcTitle = inheritedSeoTitle + title;
+    const calcTitle = this.getCalculatedTitle(title, inheritedSeoTitle);
 
     // write to cache
     const seoTitleData = new SeoTitleData(calcTitle, inheritedSeoTitle);
     state.fileSeoTitle[relFile] = seoTitleData;
 
     // write to disk
-    const destCalcTitleFile = this.pathManager.destPath(rename(relFile, (_) => {
-      return { ext: defs.dest.seoTitleExt };
-    }));
-    await this.writeTitleFile(destCalcTitleFile, calcTitle);
+    await this.writeFileTitleFile(relFile, calcTitle);
 
     return new Result(seoTitleData, false);
   }
@@ -64,28 +61,43 @@ export default class SeoTitleManager {
     }
 
     const title = (await this.titleManager.updateDirTitleAsync(relDir, false)).result;
-    const calcTitle = inheritedSeoTitle + title;
+    const calcTitle = this.getCalculatedTitle(title, inheritedSeoTitle);
     const setTitleData = new SeoTitleData(calcTitle, inheritedSeoTitle);
 
     // write to cache
     state.dirSeoTitle[relDir] = setTitleData;
 
     // write to file
-    const destTitleFile = this.pathManager.joinedDestPath(relDir, defs.dest.dirSeoTitleFile);
-    await this.writeTitleFile(destTitleFile, calcTitle);
+    await this.writeDirTitleFile(relDir, calcTitle);
 
     return new Result(setTitleData, false);
   }
 
-  private writeTitleFile(absPath: string, title: string): Promise<void> {
-    const content = this.tryEscapeTitle(title);
-    return mfs.writeFileAsync(absPath, content);
+  private async writeFileTitleFile(relFile: string, title: string): Promise<void> {
+    // unescaped
+    const unescapedFile = rename(this.pathManager.destPath(relFile), (_) => {
+      return { ext: defs.dest.seoTitleExt };
+    });
+    await mfs.writeFileAsync(unescapedFile, title);
+
+    // escaped
+    const escapedFile = rename(this.pathManager.destPath(relFile), (_) => {
+      return { ext: defs.dest.seoTitleHtmlExt };
+    });
+    await mfs.writeFileAsync(escapedFile, escapeHTML(title));
   }
 
-  private tryEscapeTitle(title: string): string {
-    if (this.config.escapeTitle) {
-      return escapeHTML(title);
-    }
-    return title;
+  private async writeDirTitleFile(relDir: string, title: string): Promise<void> {
+    // unescaped
+    const unescapedFile = this.pathManager.joinedDestPath(relDir, defs.dest.dirSeoTitleFile);
+    await mfs.writeFileAsync(unescapedFile, title);
+
+    // escaped
+    const escapedFile = this.pathManager.joinedDestPath(relDir, defs.dest.dirSeoTitleHtmlFile);
+    await mfs.writeFileAsync(escapedFile, escapeHTML(title));
+  }
+
+  private getCalculatedTitle(title: string|undefined, seoTitle: string|undefined): string {
+    return (title || '') + (seoTitle || '');
   }
 }
