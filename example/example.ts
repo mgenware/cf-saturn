@@ -28,6 +28,8 @@ const src = './data/root';
 const dest = nodepath.join(src, '../saturn/dist');
 const cache = nodepath.join(src, '../saturn/cache');
 const config = new saturn.Config(src, dest, cache);
+config.forceWrite = true;
+
 config.logger = new saturn.Logger(new saturn.ConsoleProvider({ showColor: true }), null);
 
 (async () => {
