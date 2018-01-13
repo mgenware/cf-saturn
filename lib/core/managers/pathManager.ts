@@ -21,8 +21,10 @@ export default class PathManager {
   }
 
   basePath(relPath: string): string {
-    const res = nodepath.dirname(relPath);
-    return res === '.' ? '' : res;
+    if (!relPath || relPath === '.') {
+      return '';
+    }
+    return nodepath.dirname(relPath);
   }
 
   url(url: string): string {

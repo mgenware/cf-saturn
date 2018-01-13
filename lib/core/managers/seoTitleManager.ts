@@ -39,6 +39,7 @@ export default class SeoTitleManager {
   }
 
   private async updateSeoTitleForDir(relDir: string): Promise<Result<SeoTitleData>> {
+    console.log(`${relDir}`);
     // required for recursion termination
     if (!relDir) {
       return new Result(new SeoTitleData('', ''), false);
@@ -50,14 +51,19 @@ export default class SeoTitleManager {
       return new Result(dicValue, true);
     }
 
-    // check if t_seo.txt exists
-    const srcSeoTitleFile = this.pathManager.joinedSrcPath(relDir, defs.src.seoTitleFile);
+    // the t_seo.txt file won't affect current seo title. Current seo title is inherited from parent directory.
+    const parentDir = this.pathManager.basePath(relDir);
+    if (!parentDir) {
+      return new Result(new SeoTitleData('', ''), false);
+    }
+
+    // check if parent.t_seo.txt exists
+    const srcSeoTitleFile = this.pathManager.joinedSrcPath(parentDir, defs.src.seoTitleFile);
     let inheritedSeoTitle = '';
     if (await mfs.fileExists(srcSeoTitleFile)) {
       inheritedSeoTitle = trimEnd(await mfs.readTextFileAsync(srcSeoTitleFile));
     } else {
-      const baseDir = this.pathManager.basePath(relDir);
-      inheritedSeoTitle = (await this.updateSeoTitleForDir(baseDir)).result.inheritedTitle;
+      inheritedSeoTitle = (await this.updateSeoTitleForDir(parentDir)).result.inheritedTitle;
     }
 
     const title = (await this.titleManager.updateDirTitleAsync(relDir, false)).result;
