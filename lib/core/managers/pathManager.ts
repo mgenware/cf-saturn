@@ -34,4 +34,8 @@ export default class PathManager {
   name(path: string): string {
     return nodepath.basename(path);
   }
+
+  nameWithoutExt(path: string): string {
+    return nodepath.parse(path).name;
+  }
 }

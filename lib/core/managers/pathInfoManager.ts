@@ -17,7 +17,7 @@ export default class PathInfoManager {
       return new Result(state.filePathInfo[relFile], true);
     }
 
-    const name = this.pathManager.name(relFile);
+    const name = this.pathManager.nameWithoutExt(relFile);
     const title = (await this.titleManager.updateFileTitleAsync(relFile)).result;
 
     // add to cache
