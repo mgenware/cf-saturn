@@ -39,7 +39,6 @@ export default class SeoTitleManager {
   }
 
   private async updateSeoTitleForDir(relDir: string): Promise<Result<SeoTitleData>> {
-    console.log(`${relDir}`);
     // required for recursion termination
     if (!relDir) {
       return new Result(new SeoTitleData('', ''), false);

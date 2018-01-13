@@ -14,26 +14,19 @@
   version "3.5.16"
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.16.tgz#d65dbbf3bc62a0b3dd145f48dc6511b1ed8cc6bb"
 
-"@types/glob@*":
-  version "5.0.33"
-  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-5.0.33.tgz#3dff7c6ce09d65abe919c7961dc3dee016f36ad7"
-  dependencies:
-    "@types/minimatch" "*"
-    "@types/node" "*"
-
-"@types/globby@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@types/globby/-/globby-6.1.0.tgz#7c25b975512a89effea2a656ca8cf6db7fb29d11"
-  dependencies:
-    "@types/glob" "*"
+"@types/braces@*":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@types/braces/-/braces-2.3.0.tgz#d00ec0a76562b2acb6f29330be33a093e33ed25c"
 
 "@types/jest@^22.0.1":
   version "22.0.1"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.0.1.tgz#6370a6d60cce3845e4cd5d00bf65f654264685bc"
 
-"@types/minimatch@*":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.1.tgz#b683eb60be358304ef146f5775db4c0e3696a550"
+"@types/micromatch@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/micromatch/-/micromatch-3.1.0.tgz#514c8a3d24b2680a9b838eeb80e6d7d724545433"
+  dependencies:
+    "@types/braces" "*"
 
 "@types/node@*":
   version "8.0.34"
@@ -2128,7 +2121,7 @@ micromatch@^2.1.5, micromatch@^2.3.11:
     parse-glob "^3.0.4"
     regex-cache "^0.4.2"
 
-micromatch@^3.1.0:
+micromatch@^3.1.0, micromatch@^3.1.5:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-3.1.5.tgz#d05e168c206472dfbca985bfef4f57797b4cd4ba"
   dependencies:

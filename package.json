@@ -17,7 +17,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/bluebird": "^3.5.16",
-    "@types/globby": "^6.1.0",
     "@types/jest": "^22.0.1",
     "@types/node": "*",
     "@types/tmp": "^0.0.33",
@@ -44,15 +43,16 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
+    "@types/micromatch": "^3.1.0",
     "barbary-node": "^1.2.0",
     "bluebird": "^3.5.1",
     "escape-html": "^1.0.3",
     "fx43": "^0.0.11",
     "fx54-node": "^1.0.2",
-    "globby": "^6.1.0",
     "lodash.trimend": "^4.5.1",
     "m-fs": "^1.0.1",
     "markdown-it-coldmark": "^0.0.2",
+    "micromatch": "^3.1.5",
     "mkdirp-promise": "^5.0.1",
     "node-filter-async": "^0.0.4",
     "node-rename-path": "^2.0.1"
