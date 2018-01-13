@@ -10,5 +10,6 @@ export default {
     dirTitleFile: '__dir.t.g.txt',
     dirSeoTitleFile: '__dir.t_seo.g.txt',
     dirPathBarFile: '__dir.path.g.html',
+    dirFileListFile: '__dir.content.g.html',
   },
 };

@@ -19,10 +19,13 @@ export class State {
   // the explicitly set title for a file
   fileTitle: { [key: string]: string} = {};
 
-  // --- PathBar ---
+  // --- Path info ---
   dirPathInfo: { [key: string]: PathInfo } = {};
+  filePathInfo: { [key: string]: PathInfo } = {};
+
+  // --- PathBar ---
   dirPathBar: { [key: string]: PathInfo[] } = {};
 
   // -- File list ---
-  dirChildList: { [key: string]: PathInfo[] } = {};
+  dirFileList: { [key: string]: PathInfo[] } = {};
 }

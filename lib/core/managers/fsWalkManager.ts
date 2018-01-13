@@ -20,4 +20,12 @@ export default class FsWalkManager {
       return res.map((name) => nodepath.join(relDir, name));
     });
   }
+
+  async isLeafDirAsync(relDir: string): Promise<boolean> {
+    const srcDir = this.pathManager.srcPath(relDir);
+    // check if this directory is a leaf directory
+    const subDirs = await mfs.listSubDirs(srcDir);
+    return subDirs.length === 0;
+  }
+
 }

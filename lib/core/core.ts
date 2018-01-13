@@ -7,6 +7,8 @@ import MarkdownManager from './managers/markdownManager';
 import PathManager from './managers/pathManager';
 import SeoTitleManager from './managers/seoTitleManager';
 import PathBarManager from './managers/pathBarManager';
+import FileListManager from './managers/fileListManager';
+import PathInfoManager from './managers/pathInfoManager';
 
 export class Processor {
   titleManager: TitleManager;
@@ -14,6 +16,8 @@ export class Processor {
   pathManager: PathManager;
   seoTitleManager: SeoTitleManager;
   pathBarManager: PathBarManager;
+  pathInfoManager: PathInfoManager;
+  fileListManager: FileListManager;
 
   state: State;
 
@@ -28,7 +32,10 @@ export class Processor {
     this.titleManager = new TitleManager(config, state, this.pathManager);
     this.markdownManager = new MarkdownManager(this.pathManager);
     this.seoTitleManager = new SeoTitleManager(config, state, this.titleManager, this.pathManager);
-    this.pathBarManager = new PathBarManager(config, state, this.pathManager, this.titleManager, contentGenerator);
+
+    this.pathInfoManager = new PathInfoManager(state, this.pathManager, this.titleManager);
+    this.pathBarManager = new PathBarManager(config, state, this.pathManager, this.titleManager, this.pathInfoManager
+      , contentGenerator);
   }
 
   async startFromFile(relFile: string) {
@@ -39,5 +46,6 @@ export class Processor {
     await this.titleManager.updateDirTitleAsync(relDir, true);
     await this.seoTitleManager.updateCalculatedTitle(relFile);
     await this.pathBarManager.updatePathBar(relDir);
+    await this.fileListManager.updateFileList(relDir, true);
   }
 }

@@ -6,6 +6,7 @@ import PathInfo from '../../pathInfo';
 import { Result } from './common';
 import ContentGenerator from '../../contentGenerator';
 import defs from '../../defs';
+import PathInfoManager from './pathInfoManager';
 import * as mfs from 'm-fs';
 
 export default class PathBarManager {
@@ -14,6 +15,7 @@ export default class PathBarManager {
     public state: State,
     public pathManager: PathManager,
     public titleManager: TitleManager,
+    public pathInfoManager: PathInfoManager,
     public contentGenerator: ContentGenerator,
   ) {}
 
@@ -30,7 +32,7 @@ export default class PathBarManager {
 
     const parentDir = this.pathManager.basePath(relDir);
     const paths = (await this.updatePathBar(parentDir)).result;
-    paths.push((await this.componentFromDir(relDir)).result);
+    paths.push((await this.pathInfoManager.infoFromDir(relDir)).result);
 
     // add to cache
     state.dirPathBar[relDir] = paths;
@@ -41,21 +43,5 @@ export default class PathBarManager {
     await mfs.writeFileAsync(destFile, contentHtml);
 
     return new Result(paths, false);
-  }
-
-  private async componentFromDir(relDir: string): Promise<Result<PathInfo>> {
-    const state = this.state;
-    if (state.dirPathInfo[relDir]) {
-      return new Result(state.dirPathInfo[relDir], true);
-    }
-
-    const name = this.pathManager.name(relDir);
-    const title = (await this.titleManager.updateDirTitleAsync(relDir, false)).result;
-
-    // add to cache
-    const component = new PathInfo(name, title);
-    state.dirPathInfo[relDir] = component;
-
-    return new Result(component, false);
   }
 }
