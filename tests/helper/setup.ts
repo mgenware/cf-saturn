@@ -18,10 +18,14 @@ class MyGenerator extends saturn.ContentGenerator {
   generateContentHtml(items: saturn.PathInfo[]): string {
     let html = '<div class="k-content"><ul>';
     for (const item of items) {
-      html += this.makeATag(item.displayNameHTML, item.fullURL);
+      html += this.makeLiTag(this.makeATag(item.displayNameHTML, item.fullURL));
     }
     html += '</ul></div>';
     return html;
+  }
+
+  makeLiTag(rawContent: string): string {
+    return `<li>${rawContent}</li>`;
   }
 
   makeATag(rawContent: string, rawHref: string): string {
