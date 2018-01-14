@@ -21,7 +21,7 @@ class TitleExtractor {
     }
     let title: string = firstLine;
     title = title.substr(1);
-    return title.trim();
+    return (title || '').trim();
   }
 
   static async titleFromDirAsync(absDir: string): Promise<string> {
@@ -34,7 +34,7 @@ class TitleExtractor {
       // if dir/t.txt doesn't exist, take directory name as title
       displayTitle = nodepath.basename(absDir);
     }
-    return displayTitle.trim();
+    return (displayTitle || '').trim();
   }
 }
 
