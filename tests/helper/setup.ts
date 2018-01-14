@@ -10,7 +10,7 @@ class MyGenerator extends saturn.ContentGenerator {
   generatePathBarHtml(items: saturn.PathInfo[]): string {
     let html = '';
     for (const item of items) {
-      html += this.makeATag(item.displayNameHTML, item.fullURL);
+      html += this.makeATag(item.escapedTitle, item.fullURL);
     }
     return html;
   }
@@ -18,7 +18,8 @@ class MyGenerator extends saturn.ContentGenerator {
   generateContentHtml(items: saturn.PathInfo[]): string {
     let html = '<div class="k-content"><ul>';
     for (const item of items) {
-      html += this.makeLiTag(this.makeATag(item.displayNameHTML, item.fullURL));
+      const itemHtml = this.makeLiTag(this.makeATag(item.escapedTitle, item.fullURL));
+      html += itemHtml;
     }
     html += '</ul></div>';
     return html;
