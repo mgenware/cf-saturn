@@ -6,12 +6,12 @@ beforeAll(async () => {
 
 test('main', async () => {
   const expected = { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a">a</a></li></ul></div>',
-  '__dir.path.g.html': '<a href="/.">&lt;TITLE&gt;</a>',
+  '__dir.path.g.html': '<a href="/">&lt;TITLE&gt;</a>',
   '__dir.t.g.html': '&lt;TITLE&gt;',
   '__dir.t.g.txt': '<TITLE>',
   a:
-   { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a">title</a></li></ul></div>',
-     '__dir.path.g.html': '<a href="/.">&lt;TITLE&gt;</a><a href="/a">a</a>',
+   { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a/a">title</a></li></ul></div>',
+     '__dir.path.g.html': '<a href="/">&lt;TITLE&gt;</a><a href="/a">a</a>',
      '__dir.t.g.html': 'a',
      '__dir.t.g.txt': 'a',
      '__dir.t_seo.g.html': 'a',

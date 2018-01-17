@@ -6,12 +6,12 @@ beforeAll(async () => {
 
 test('main', async () => {
   const expected = { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a">a</a></li></ul></div>',
-  '__dir.path.g.html': '<a href="/.">&lt;Root&gt;&lt;/Root&gt;</a>',
+  '__dir.path.g.html': '<a href="/">&lt;Root&gt;&lt;/Root&gt;</a>',
   '__dir.t.g.html': '&lt;Root&gt;&lt;/Root&gt;',
   '__dir.t.g.txt': '<Root></Root>',
   a:
-   { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/b">b</a></li><li><a href="/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a></li></ul></div>',
-     '__dir.path.g.html': '<a href="/.">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a>',
+   { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a/b">b</a></li><li><a href="/a/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a></li></ul></div>',
+     '__dir.path.g.html': '<a href="/">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a>',
      '__dir.t.g.html': 'a',
      '__dir.t.g.txt': 'a',
      '__dir.t_seo.g.html': 'a',
@@ -22,8 +22,8 @@ test('main', async () => {
      'a.t_seo.g.html': '&lt;a&gt;&lt;/a&gt;',
      'a.t_seo.g.txt': '<a></a>',
      b:
-      { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/b">&lt;b&gt;&lt;/b&gt;</a></li></ul></div>',
-        '__dir.path.g.html': '<a href="/.">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/b">b</a>',
+      { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a/b/b">&lt;b&gt;&lt;/b&gt;</a></li></ul></div>',
+        '__dir.path.g.html': '<a href="/">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/a/b">b</a>',
         '__dir.t.g.html': 'b',
         '__dir.t.g.txt': 'b',
         '__dir.t_seo.g.html': 'b - &lt;A&gt;&lt;/A&gt;',
@@ -34,20 +34,20 @@ test('main', async () => {
         'b.t_seo.g.html': '&lt;b&gt;&lt;/b&gt; - &lt;A&gt;&lt;/A&gt;',
         'b.t_seo.g.txt': '<b></b> - <A></A>' },
      c:
-      { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/d">d</a></li></ul></div>',
-        '__dir.path.g.html': '<a href="/.">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/b">b</a><a href="/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a>',
+      { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a/c/d">d</a></li></ul></div>',
+        '__dir.path.g.html': '<a href="/">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/a/b">b</a><a href="/a/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a>',
         '__dir.t.g.html': '&lt;dir.c&gt;&lt;/dir.c&gt;',
         '__dir.t.g.txt': '<dir.c></dir.c>',
         d:
-         { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/e">&lt;dir.e&gt;&lt;/dir.e&gt;</a></li></ul></div>',
-           '__dir.path.g.html': '<a href="/.">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/b">b</a><a href="/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a><a href="/d">d</a>',
+         { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a/c/d/e">&lt;dir.e&gt;&lt;/dir.e&gt;</a></li></ul></div>',
+           '__dir.path.g.html': '<a href="/">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/a/b">b</a><a href="/a/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a><a href="/a/c/d">d</a>',
            '__dir.t.g.html': 'd',
            '__dir.t.g.txt': 'd',
            '__dir.t_seo.g.html': 'd - &lt;B&gt;&lt;/B&gt;',
            '__dir.t_seo.g.txt': 'd - <B></B>',
            e:
-            { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/e">&lt;e&gt;&lt;/e&gt;</a></li></ul></div>',
-              '__dir.path.g.html': '<a href="/.">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/b">b</a><a href="/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a><a href="/d">d</a><a href="/e">&lt;dir.e&gt;&lt;/dir.e&gt;</a>',
+            { '__dir.content.g.html': '<div class="k-content"><ul><li><a href="/a/c/d/e/e">&lt;e&gt;&lt;/e&gt;</a></li></ul></div>',
+              '__dir.path.g.html': '<a href="/">&lt;Root&gt;&lt;/Root&gt;</a><a href="/a">a</a><a href="/a/b">b</a><a href="/a/c">&lt;dir.c&gt;&lt;/dir.c&gt;</a><a href="/a/c/d">d</a><a href="/a/c/d/e">&lt;dir.e&gt;&lt;/dir.e&gt;</a>',
               '__dir.t.g.html': '&lt;dir.e&gt;&lt;/dir.e&gt;',
               '__dir.t.g.txt': '<dir.e></dir.e>',
               '__dir.t_seo.g.html': '&lt;dir.e&gt;&lt;/dir.e&gt; - &lt;B&gt;&lt;/B&gt;',
