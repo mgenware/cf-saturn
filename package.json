@@ -47,7 +47,7 @@
     "barbary-node": "^1.2.0",
     "bluebird": "^3.5.1",
     "escape-html": "^1.0.3",
-    "fx43": "^2.0.0",
+    "fx43": "^2.0.2",
     "fx54-node": "^1.0.3",
     "lodash.trimend": "^4.5.1",
     "m-fs": "^1.0.1",

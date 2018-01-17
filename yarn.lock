@@ -1073,9 +1073,9 @@ function-bind@^1.0.2, function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
 
-fx43@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/fx43/-/fx43-2.0.0.tgz#b024e299e684e92af92ab31fde89c7eeef10089b"
+fx43@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/fx43/-/fx43-2.0.2.tgz#7b43c04c17af40629dba4781753d290dc9219354"
   dependencies:
     "@types/jest" "^22.0.1"
     fx58-node "^1.0.4"
