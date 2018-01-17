@@ -36,10 +36,10 @@ export default class FileListManager {
     let fileList: PathInfo[];
     if (isLeaf) {
       const files = await this.fsWalkManager.listSubFilesAsync(relDir);
-      fileList = await this.pathInfoManager.infoFromFiles(files);
+      fileList = await this.pathInfoManager.infoFromFilesAsync(files);
     } else {
       const dirs = await this.fsWalkManager.listSubDirsAsync(relDir);
-      fileList = await this.pathInfoManager.infoFromDirs(dirs);
+      fileList = await this.pathInfoManager.infoFromDirsAsync(dirs);
     }
 
     // add to cache

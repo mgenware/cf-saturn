@@ -2,16 +2,18 @@ import PathManager from './pathManager';
 import TitleManager from './titleManager';
 import { State } from '../state';
 import PathInfo from '../../pathInfo';
+import Config from '../../config';
 import { Result } from './common';
 
 export default class PathInfoManager {
   constructor(
+    public config: Config,
     public state: State,
     public pathManager: PathManager,
     public titleManager: TitleManager,
   ) {}
 
-  async infoFromFile(relFile: string): Promise<Result<PathInfo>> {
+  async infoFromFileAsync(relFile: string): Promise<Result<PathInfo>> {
     const state = this.state;
     if (state.filePathInfo[relFile]) {
       return new Result(state.filePathInfo[relFile], true);
@@ -21,13 +23,15 @@ export default class PathInfoManager {
     const title = (await this.titleManager.updateFileTitleAsync(relFile)).result;
 
     // add to cache
-    const component = new PathInfo(name, title);
+    const parentDir = this.pathManager.basePath(relFile);
+    const parentInfo = (await this.infoFromDirAsync(parentDir)).result;
+    const component = PathInfo.newInfo(name, title, parentInfo);
     state.filePathInfo[relFile] = component;
 
     return new Result(component, false);
   }
 
-  async infoFromDir(relDir: string): Promise<Result<PathInfo>> {
+  async infoFromDirAsync(relDir: string): Promise<Result<PathInfo>> {
     const state = this.state;
     if (state.dirPathInfo[relDir]) {
       return new Result(state.dirPathInfo[relDir], true);
@@ -37,21 +41,28 @@ export default class PathInfoManager {
     const title = (await this.titleManager.updateDirTitleAsync(relDir, false)).result;
 
     // add to cache
-    const component = new PathInfo(name, title);
+    const parentDir = this.pathManager.basePath(relDir);
+    let parentInfo: PathInfo|null = null;
+    if (parentDir) {
+      parentInfo = (await this.infoFromDirAsync(parentDir)).result;
+    } else {
+      parentInfo = PathInfo.newRootInfo(this.config.rootURL);
+    }
+    const component = PathInfo.newInfo(name, title, parentInfo);
     state.dirPathInfo[relDir] = component;
 
     return new Result(component, false);
   }
 
-  async infoFromFiles(relFiles: string[]): Promise<PathInfo[]> {
+  async infoFromFilesAsync(relFiles: string[]): Promise<PathInfo[]> {
     return await Promise.all(relFiles.map(async (d) => {
-      return (await this.infoFromFile(d)).result;
+      return (await this.infoFromFileAsync(d)).result;
     }));
   }
 
-  async infoFromDirs(relDirs: string[]): Promise<PathInfo[]> {
+  async infoFromDirsAsync(relDirs: string[]): Promise<PathInfo[]> {
     return await Promise.all(relDirs.map(async (d) => {
-      return (await this.infoFromDir(d)).result;
+      return (await this.infoFromDirAsync(d)).result;
     }));
   }
 }

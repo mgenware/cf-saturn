@@ -3,13 +3,13 @@ import * as nodepath from 'path';
 
 export default class Config {
   logger: bb.Logger|undefined;
-  rootURL: string         = '';
   forceWrite: boolean     = false;
 
   constructor(
     public srcDir: string,
     public destDir: string,
     public cacheDir: string,
+    public rootURL: string = '/',
   ) {
     this.validateParameter(srcDir, 'srcDir');
     this.validateParameter(destDir, 'destDir');

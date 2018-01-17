@@ -32,7 +32,7 @@ export default class PathBarManager {
 
     const parentDir = this.pathManager.basePath(relDir);
     const paths = (await this.updatePathBar(parentDir)).result;
-    paths.push((await this.pathInfoManager.infoFromDir(relDir)).result);
+    paths.push((await this.pathInfoManager.infoFromDirAsync(relDir)).result);
 
     // add to cache
     state.dirPathBar[relDir] = paths;

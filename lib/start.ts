@@ -1,5 +1,5 @@
 import * as nodepath from 'path';
-import * as fx43 from 'fx43';
+import { startCustomModeAsync } from 'fx43';
 import * as core from './core/core';
 import * as bluebird from 'bluebird';
 import Config from './config';
@@ -27,7 +27,13 @@ export async function startAsync(config: Config, generator: ContentGenerator) {
 
   const processor = new core.Processor(config, generator);
   // only changed files will be processed
-  const files = await fx43.start(srcDir, '**/*.md!(_*)', cacheDir, config.forceWrite);
+  const files = await startCustomModeAsync(srcDir, cacheDir, config.forceWrite,
+  (fileName) => {
+    return /.*\.(md|json)$/i.test(fileName) && !fileName.startsWith('.');
+  },
+  (dirName) => {
+    return !dirName.startsWith('.');
+  });
 
   if (logger) {
     logger.logInfo('changed-files', {
