@@ -1,6 +1,6 @@
 {
   "name": "cf-saturn",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Wiki-like static content generator",
   "main": "dist/lib/main.js",
   "types": "dist/lib/main.d.ts",
@@ -56,5 +56,11 @@
     "mkdirp-promise": "^5.0.1",
     "node-filter-async": "^0.0.4",
     "node-rename-path": "^2.0.1"
-  }
+  },
+  "files":[
+    "dist/lib",
+    ".gitignore",
+    "README.md",
+    "package.json"
+  ]
 }
