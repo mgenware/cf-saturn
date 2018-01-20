@@ -1,7 +1,7 @@
 import * as mfs from 'm-fs';
 import PathManager from './pathManager';
 import * as nodepath from 'path';
-import * as mm from 'micromatch';
+import defs from '../../defs';
 
 export default class FsWalkManager {
   constructor(
@@ -11,17 +11,15 @@ export default class FsWalkManager {
   async listSubFilesAsync(relDir: string): Promise<string[]> {
     const srcDir = this.pathManager.srcPath(relDir);
 
-    return (await mfs.listSubFiles(srcDir)).filter((file) => {
-      return mm.isMatch(file, '*.md');
-    }).map((file) => {
+    return (await mfs.listSubFiles(srcDir)).filter(defs.system.fileFilter).map((file) => {
       return nodepath.join(relDir, file);
     });
   }
 
   async listSubDirsAsync(relDir: string): Promise<string[]> {
     const srcDir = this.pathManager.srcPath(relDir);
-    return await mfs.listSubDirs(srcDir).then((res) => {
-      return res.map((name) => nodepath.join(relDir, name));
+    return (await mfs.listSubDirs(srcDir)).filter(defs.system.dirFilter).map((dir) => {
+      return nodepath.join(relDir, dir);
     });
   }
 

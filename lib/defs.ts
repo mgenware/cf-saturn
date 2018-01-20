@@ -25,4 +25,15 @@ export default {
     // --- file list ---
     dirFileListFile: '__dir.content.g.html',
   },
+  system: {
+    fileFilter: (fileName: string) => {
+      return /.*\.(md|json)$/i.test(fileName)
+        && !fileName.startsWith('.')
+        && !fileName.startsWith('_');
+    },
+    dirFilter: (dirName: string) => {
+      return !dirName.startsWith('.')
+        && !dirName.startsWith('_');
+    },
+  },
 };
