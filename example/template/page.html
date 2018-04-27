@@ -4,13 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{.Title}}</title>
+    <title>{{html .Title}}</title>
   </head>
 
   <body>
-    <p>{{html .PathHTML}}</p>
-    <h1>{{.Title}}</h1>
+    <p>{{.PathHTML}}</p>
+    <h1>{{html .Title}}</h1>
     <hr/>
-    <div>{{html .ContentHTML}}</div>
+    <div>{{.ContentHTML}}</div>
   </body>
 </html>

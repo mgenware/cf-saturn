@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"cf-saturn"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"text/template"
 
 	"github.com/mgenware/go-packagex/templatex"
 )
@@ -56,7 +56,9 @@ func renderPage(page *saturn.Page) string {
 		pageData.ContentHTML = renderComps(content.Children, true)
 	}
 
-	return templatex.ExecuteToString(pageTemplate, pageData)
+	html := templatex.ExecuteToString(pageTemplate, pageData)
+	log.Println(html)
+	return html
 }
 
 func main() {
