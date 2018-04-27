@@ -55,6 +55,7 @@ func renderPage(page *saturn.Page) string {
 	if content.Children != nil {
 		pageData.ContentHTML = renderComps(content.Children, true)
 	}
+
 	return templatex.ExecuteToString(pageTemplate, pageData)
 }
 

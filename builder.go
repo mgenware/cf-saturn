@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type Builder struct {
@@ -122,6 +123,14 @@ func (builder *Builder) getChildList(relDir, absDir string) ([]*PathComponent, e
 
 	for _, childName := range files {
 		name := childName.Name()
+		isValid, err := builder.isValidChild(absDir, name)
+		if err != nil {
+			return nil, err
+		}
+		if !isValid {
+			continue
+		}
+
 		comp, err := builder.getChildComponent(filepath.Join(relDir, name), filepath.Join(absDir, name))
 		if err != nil {
 			return nil, err
@@ -166,4 +175,18 @@ func (builder *Builder) absPath(relPath string) string {
 
 func (builder *Builder) urlString(relPath string) string {
 	return path.Join(builder.PrefixURL, relPath)
+}
+
+func (builder *Builder) isValidChild(parentPath, childName string) (bool, error) {
+	// Directories and .md files are considered valid children
+	isDir, err := iox.IsDirectory(filepath.Join(parentPath, childName))
+	if err != nil {
+		return false, err
+	}
+	if isDir {
+		return true, nil
+	}
+
+	ext := filepath.Ext(childName)
+	return strings.EqualFold(ext, ".md"), nil
 }
