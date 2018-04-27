@@ -8,7 +8,7 @@
     "iox",
     "templatex"
   ]
-  revision = "e26b10d7d25da2f8f41fbc7d858a2da1c5236f65"
+  revision = "c3e77fa6e5de244911aafc0e694d95ced91fde5b"
 
 [solve-meta]
   analyzer-name = "dep"
