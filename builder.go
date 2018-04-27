@@ -56,16 +56,12 @@ func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	content, err := builder.mgr.ContentForFile(relFile, absFile)
-	if err != nil {
-		return nil, err
-	}
 	paths, err := builder.getPathComponents(filepath.Dir(relFile), filepath.Dir(absFile), 0, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewPage(title, NewPostPageContent(content), paths), nil
+	return NewPage(title, NewFileContent(absFile), paths), nil
 }
 
 func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, list []*PagePathComponent) ([]*PagePathComponent, error) {
