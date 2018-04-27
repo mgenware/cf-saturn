@@ -57,7 +57,6 @@ func renderPage(page *saturn.Page) string {
 	}
 
 	html := templatex.ExecuteToString(pageTemplate, pageData)
-	log.Println(html)
 	return html
 }
 

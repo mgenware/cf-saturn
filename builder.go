@@ -6,7 +6,6 @@ import (
 	"errors"
 	"go-packagex/iox"
 	"io/ioutil"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -102,7 +101,7 @@ func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, 
 		return nil, err
 	}
 
-	pathComp := NewPathComponent(filepath.Base(relDir), title, builder.urlString(relDir))
+	pathComp := NewPathComponent(filepath.Base(relDir), title, lib.FilePathToURL(relDir))
 	result := append(list, pathComp)
 
 	if lib.IsRelPathTheSame(relDir) {
@@ -148,7 +147,7 @@ func (builder *Builder) getChildComponent(relPath, absPath string) (*PathCompone
 	}
 
 	var url, name, title string
-	url = builder.urlString(relPath)
+	url = lib.FilePathToURL(relPath)
 	name = filepath.Base(relPath)
 	if isFile {
 		title, err = builder.mgr.TitleForFile(relPath, absPath)
@@ -171,10 +170,6 @@ func (builder *Builder) relPath(absPath string) (string, error) {
 
 func (builder *Builder) absPath(relPath string) string {
 	return filepath.Join(builder.RootDirectory, relPath)
-}
-
-func (builder *Builder) urlString(relPath string) string {
-	return path.Join(builder.PrefixURL, relPath)
 }
 
 func (builder *Builder) isValidChild(parentPath, childName string) (bool, error) {
