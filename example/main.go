@@ -1,16 +1,27 @@
 package main
 
 import (
+	"bytes"
 	"cf-saturn"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/mgenware/go-packagex/templatex"
 )
 
+type PageData struct {
+	Title, ContentHTML, PathHTML string
+}
+
 var builder *saturn.Builder
+var pathCompTemplate *template.Template
+var pageTemplate *template.Template
 
 func init() {
+	// Initialize builder
 	b, err := saturn.NewBuilder("./data")
 	if err != nil {
 		log.Fatal(err)
@@ -21,6 +32,30 @@ func init() {
 	}
 
 	builder = b
+
+	// Load templates
+	pathCompTemplate = templatex.MustParseFromFile("./template/pathComp.html")
+	pageTemplate = templatex.MustParseFromFile("./template/page.html")
+}
+
+func renderComps(paths []*saturn.PathComponent, newline bool) string {
+	var buffer bytes.Buffer
+	for _, p := range paths {
+		buffer.WriteString(templatex.ExecuteToString(pathCompTemplate, p))
+	}
+	return buffer.String()
+}
+
+func renderPage(page *saturn.Page) string {
+	pageData := &PageData{}
+	pageData.Title = page.Title
+	pageData.PathHTML = renderComps(page.Paths, false)
+
+	content := page.Content
+	if content.Children != nil {
+		pageData.ContentHTML = renderComps(content.Children, true)
+	}
+	return templatex.ExecuteToString(pageTemplate, pageData)
 }
 
 func main() {
@@ -35,8 +70,7 @@ func main() {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		content := fmt.Sprintf("<html><body><b>%v</b><br/>%v</body></html>", r.URL.Path, page)
-		fmt.Fprint(w, content)
+		fmt.Fprint(w, renderPage(page))
 	})
 
 	log.Print(builder)

@@ -4,12 +4,15 @@
 [[projects]]
   branch = "master"
   name = "github.com/mgenware/go-packagex"
-  packages = ["iox"]
-  revision = "58c7b682d85b589b5f1592bb55dac6a32396e701"
+  packages = [
+    "iox",
+    "templatex"
+  ]
+  revision = "e26b10d7d25da2f8f41fbc7d858a2da1c5236f65"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7e530f4bec87c52d76993cf034d224b67fab6e57f80bcd2659be78c7afdffd73"
+  inputs-digest = "ab00a200aa9c446edd5d3d4995f419efa78650129c9a548e6eea9de547469396"
   solver-name = "gps-cdcl"
   solver-version = 1
