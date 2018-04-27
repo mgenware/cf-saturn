@@ -3,21 +3,22 @@ package saturn
 import "fmt"
 
 type Page struct {
-	Paths   []*PagePathComponent
+	Paths   []*PathComponent
 	Content *PageContent
 	Title   string
 }
 
-type PagePathComponent struct {
-	Name string
-	URL  string
+type PathComponent struct {
+	Name  string
+	Title string
+	URL   string
 }
 
-func NewPagePathComponent(name, url string) *PagePathComponent {
-	return &PagePathComponent{Name: name, URL: url}
+func NewPathComponent(name, title, url string) *PathComponent {
+	return &PathComponent{Name: name, Title: title, URL: url}
 }
 
-func NewPage(title string, content *PageContent, paths []*PagePathComponent) *Page {
+func NewPage(title string, content *PageContent, paths []*PathComponent) *Page {
 	return &Page{
 		Title:   title,
 		Content: content,
@@ -25,6 +26,6 @@ func NewPage(title string, content *PageContent, paths []*PagePathComponent) *Pa
 	}
 }
 
-func (comp *PagePathComponent) String() string {
+func (comp *PathComponent) String() string {
 	return fmt.Sprintf("[%v](%v)", comp.Name, comp.URL)
 }

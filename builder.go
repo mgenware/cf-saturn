@@ -5,6 +5,7 @@ import (
 	"cf-saturn/manager"
 	"errors"
 	"go-packagex/iox"
+	"io/ioutil"
 	"path"
 	"path/filepath"
 )
@@ -45,10 +46,14 @@ func (builder *Builder) Build(relPath string) (*Page, error) {
 		return nil, errors.New("Path is outside root")
 	}
 
-	if isFile, _ := iox.IsFile(absPath); isFile {
+	isFile, err := iox.IsFile(absPath)
+	if err != nil {
+		return nil, err
+	}
+	if isFile {
 		return builder.buildFile(relPath, absPath)
 	}
-	return nil, errors.New("NOT SUPPORTED")
+	return builder.buildDir(relPath, absPath)
 }
 
 func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
@@ -64,7 +69,21 @@ func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
 	return NewPage(title, NewFileContent(absFile), paths), nil
 }
 
-func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, list []*PagePathComponent) ([]*PagePathComponent, error) {
+func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
+	title, err := builder.mgr.TitleForDirectory(relDir, absDir)
+	if err != nil {
+		return nil, err
+	}
+	paths, err := builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir), 0, nil)
+	if err != nil {
+		return nil, err
+	}
+	childComps, err := builder.getChildList(relDir, absDir)
+
+	return NewPage(title, NewDirectoryContent(relDir, childComps), paths), nil
+}
+
+func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, list []*PathComponent) ([]*PathComponent, error) {
 	if walkCount > builder.MaxWalk {
 		return nil, errors.New("MaxWalk number has been exceeded")
 	}
@@ -74,7 +93,7 @@ func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, 
 	}
 
 	if list == nil {
-		list = make([]*PagePathComponent, 0)
+		list = make([]*PathComponent, 0)
 	}
 
 	title, err := builder.mgr.TitleForDirectory(relDir, absDir)
@@ -82,13 +101,59 @@ func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, 
 		return nil, err
 	}
 
-	pathComp := NewPagePathComponent(title, builder.urlString(relDir))
+	pathComp := NewPathComponent(filepath.Base(relDir), title, builder.urlString(relDir))
 	result := append(list, pathComp)
 
 	if lib.IsRelPathTheSame(relDir) {
 		return result, nil
 	}
 	return builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir), walkCount+1, result)
+}
+
+func (builder *Builder) getChildList(relDir, absDir string) ([]*PathComponent, error) {
+	if lib.IsRelPathOutside(relDir) {
+		return nil, errors.New("Path is outside the root")
+	}
+	list := make([]*PathComponent, 0)
+	files, err := ioutil.ReadDir(absDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, childName := range files {
+		name := childName.Name()
+		comp, err := builder.getChildComponent(filepath.Join(relDir, name), filepath.Join(absDir, name))
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, comp)
+	}
+	return list, nil
+}
+
+func (builder *Builder) getChildComponent(relPath, absPath string) (*PathComponent, error) {
+	isFile, err := iox.IsFile(absPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var url, name, title string
+	url = builder.urlString(relPath)
+	name = filepath.Base(relPath)
+	if isFile {
+		title, err = builder.mgr.TitleForFile(relPath, absPath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		title, err = builder.mgr.TitleForDirectory(relPath, absPath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return NewPathComponent(name, title, url), nil
 }
 
 func (builder *Builder) relPath(absPath string) (string, error) {
