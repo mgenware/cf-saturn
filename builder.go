@@ -75,9 +75,16 @@ func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	paths, err := builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir))
-	if err != nil {
-		return nil, err
+
+	var paths []*PathComponent
+	if lib.IsRelPathTheSame(relDir) {
+		// Return an empty path array for root directory
+		paths = make([]*PathComponent, 0)
+	} else {
+		paths, err = builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir))
+		if err != nil {
+			return nil, err
+		}
 	}
 	childComps, err := builder.getChildList(relDir, absDir)
 
