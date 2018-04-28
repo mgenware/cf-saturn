@@ -77,7 +77,7 @@ func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
 	}
 
 	var paths []*PathComponent
-	if lib.IsRelPathTheSame(relDir) {
+	if lib.IsCurrentDirectory(relDir) {
 		// Return an empty path array for root directory
 		paths = make([]*PathComponent, 0)
 	} else {
@@ -127,7 +127,7 @@ func (builder *Builder) getPathComponentsInternal(relDir, absDir string, walkCou
 	pathComp := NewPathComponent(filepath.Base(relDir), title, lib.FilePathToURL(relDir))
 	result := append(list, pathComp)
 
-	if lib.IsRelPathTheSame(relDir) {
+	if lib.IsCurrentDirectory(relDir) {
 		return result, nil
 	}
 	return builder.getPathComponentsInternal(filepath.Dir(relDir), filepath.Dir(absDir), walkCount+1, result)

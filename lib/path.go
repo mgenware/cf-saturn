@@ -11,7 +11,7 @@ func IsRelPathOutside(path string) bool {
 	return strings.HasPrefix(path, "..")
 }
 
-func IsRelPathTheSame(path string) bool {
+func IsCurrentDirectory(path string) bool {
 	return path == "."
 }
 
