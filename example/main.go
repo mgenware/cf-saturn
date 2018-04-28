@@ -41,8 +41,12 @@ func init() {
 func renderComps(paths []*saturn.PathComponent, newline bool) string {
 	var buffer bytes.Buffer
 	for _, p := range paths {
-		buffer.WriteString(templatex.ExecuteToString(pathCompTemplate, p))
-		buffer.WriteString(": ")
+		if newline {
+			buffer.WriteString(fmt.Sprintf("<li>%v</li>", templatex.ExecuteToString(pathCompTemplate, p)))
+		} else {
+			buffer.WriteString(templatex.ExecuteToString(pathCompTemplate, p))
+			buffer.WriteString(": ")
+		}
 	}
 	return buffer.String()
 }
