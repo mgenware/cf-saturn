@@ -62,7 +62,7 @@ func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	paths, err := builder.getPathComponents(filepath.Dir(relFile), filepath.Dir(absFile), 0, nil)
+	paths, err := builder.getPathComponents(filepath.Dir(relFile), filepath.Dir(absFile))
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	paths, err := builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir), 0, nil)
+	paths, err := builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir))
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,22 @@ func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
 	return NewPage(title, NewDirectoryContent(relDir, childComps), paths), nil
 }
 
-func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, list []*PathComponent) ([]*PathComponent, error) {
+func (builder *Builder) getPathComponents(relDir, absDir string) ([]*PathComponent, error) {
+	result, err := builder.getPathComponentsInternal(relDir, absDir, 0, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Reverse the result array
+	for i := len(result)/2 - 1; i >= 0; i-- {
+		opp := len(result) - 1 - i
+		result[i], result[opp] = result[opp], result[i]
+	}
+
+	return result, nil
+}
+
+func (builder *Builder) getPathComponentsInternal(relDir, absDir string, walkCount int, list []*PathComponent) ([]*PathComponent, error) {
 	if walkCount > builder.MaxWalk {
 		return nil, errors.New("MaxWalk number has been exceeded")
 	}
@@ -108,7 +123,7 @@ func (builder *Builder) getPathComponents(relDir, absDir string, walkCount int, 
 	if lib.IsRelPathTheSame(relDir) {
 		return result, nil
 	}
-	return builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir), walkCount+1, result)
+	return builder.getPathComponentsInternal(filepath.Dir(relDir), filepath.Dir(absDir), walkCount+1, result)
 }
 
 func (builder *Builder) getChildList(relDir, absDir string) ([]*PathComponent, error) {
