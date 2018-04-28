@@ -3,18 +3,26 @@ package saturn
 import "fmt"
 
 type PageContent struct {
+	IsFile   bool
 	Path     string
+	Siblings []*PathComponent
 	Children []*PathComponent
 }
 
-func NewFileContent(path string) *PageContent {
-	return &PageContent{Path: path}
+func NewFileContent(path string, siblings []*PathComponent) *PageContent {
+	return &PageContent{
+		Path:     path,
+		IsFile:   true,
+		Siblings: siblings,
+	}
 }
 
 func NewDirectoryContent(path string, children []*PathComponent) *PageContent {
-	res := &PageContent{}
-	res.Path = path
-	res.Children = children
+	res := &PageContent{
+		Path:     path,
+		IsFile:   false,
+		Children: children,
+	}
 	return res
 }
 

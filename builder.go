@@ -62,12 +62,18 @@ func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	paths, err := builder.getPathComponents(filepath.Dir(relFile), filepath.Dir(absFile))
+	paths, err := builder.getParentPaths(filepath.Dir(relFile), filepath.Dir(absFile))
 	if err != nil {
 		return nil, err
 	}
 
-	return NewPage(title, NewFileContent(absFile), paths), nil
+	name := filepath.Base(relFile)
+	siblings, err := builder.getChildEntries(filepath.Dir(relFile), filepath.Dir(absFile), name)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewPage(title, NewFileContent(absFile, siblings), paths), nil
 }
 
 func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
@@ -81,18 +87,18 @@ func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
 		// Return an empty path array for root directory
 		paths = make([]*PathComponent, 0)
 	} else {
-		paths, err = builder.getPathComponents(filepath.Dir(relDir), filepath.Dir(absDir))
+		paths, err = builder.getParentPaths(filepath.Dir(relDir), filepath.Dir(absDir))
 		if err != nil {
 			return nil, err
 		}
 	}
-	childComps, err := builder.getChildList(relDir, absDir)
+	childComps, err := builder.getChildEntries(relDir, absDir, "")
 
 	return NewPage(title, NewDirectoryContent(relDir, childComps), paths), nil
 }
 
-func (builder *Builder) getPathComponents(relDir, absDir string) ([]*PathComponent, error) {
-	result, err := builder.getPathComponentsInternal(relDir, absDir, 0, nil)
+func (builder *Builder) getParentPaths(relDir, absDir string) ([]*PathComponent, error) {
+	result, err := builder.getParentPathsInternal(relDir, absDir, 0, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +112,7 @@ func (builder *Builder) getPathComponents(relDir, absDir string) ([]*PathCompone
 	return result, nil
 }
 
-func (builder *Builder) getPathComponentsInternal(relDir, absDir string, walkCount int, list []*PathComponent) ([]*PathComponent, error) {
+func (builder *Builder) getParentPathsInternal(relDir, absDir string, walkCount int, list []*PathComponent) ([]*PathComponent, error) {
 	if walkCount > builder.MaxWalk {
 		return nil, errors.New("MaxWalk number has been exceeded")
 	}
@@ -130,10 +136,10 @@ func (builder *Builder) getPathComponentsInternal(relDir, absDir string, walkCou
 	if lib.IsCurrentDirectory(relDir) {
 		return result, nil
 	}
-	return builder.getPathComponentsInternal(filepath.Dir(relDir), filepath.Dir(absDir), walkCount+1, result)
+	return builder.getParentPathsInternal(filepath.Dir(relDir), filepath.Dir(absDir), walkCount+1, result)
 }
 
-func (builder *Builder) getChildList(relDir, absDir string) ([]*PathComponent, error) {
+func (builder *Builder) getChildEntries(relDir, absDir string, exclude string) ([]*PathComponent, error) {
 	if lib.IsRelPathOutside(relDir) {
 		return nil, errors.New("Path is outside the root")
 	}
@@ -145,6 +151,9 @@ func (builder *Builder) getChildList(relDir, absDir string) ([]*PathComponent, e
 
 	for _, childName := range files {
 		name := childName.Name()
+		if name == exclude {
+			continue
+		}
 		isValid, err := builder.isValidChild(absDir, name)
 		if err != nil {
 			return nil, err

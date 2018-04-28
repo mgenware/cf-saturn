@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cf-saturn"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -51,18 +52,24 @@ func renderComps(paths []*saturn.PathComponent, newline bool) string {
 	return buffer.String()
 }
 
-func renderPage(page *saturn.Page) string {
+func renderPage(page *saturn.Page) (string, error) {
 	pageData := &PageData{}
 	pageData.Title = page.Title
 	pageData.PathHTML = renderComps(page.Paths, false)
 
 	content := page.Content
-	if content.Children != nil {
+	if content.IsFile {
+		fileBytes, err := ioutil.ReadFile(content.Path)
+		pageData.ContentHTML = string(fileBytes) + "<hr/>" + renderComps(content.Siblings, true)
+		if err != nil {
+			return "", err
+		}
+	} else {
 		pageData.ContentHTML = renderComps(content.Children, true)
 	}
 
 	html := templatex.ExecuteToString(pageTemplate, pageData)
-	return html
+	return html, nil
 }
 
 func main() {
@@ -77,7 +84,11 @@ func main() {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, renderPage(page))
+		html, err := renderPage(page)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprint(w, html)
 	})
 
 	log.Print(builder)
