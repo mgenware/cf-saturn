@@ -5,6 +5,7 @@ import (
 	"cf-saturn/manager"
 	"errors"
 	"io/ioutil"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -188,9 +189,9 @@ func (builder *Builder) getChildComponent(relPath, absPath string) (*PathCompone
 		return nil, err
 	}
 
-	var url, name, title string
-	url = lib.FilePathToURL(relPath)
+	var URL, name, title string
 	name = filepath.Base(relPath)
+	URL = url.QueryEscape(name)
 	if isFile {
 		title, err = builder.mgr.TitleForFile(relPath, absPath)
 		if err != nil {
@@ -203,7 +204,7 @@ func (builder *Builder) getChildComponent(relPath, absPath string) (*PathCompone
 		}
 	}
 
-	return NewPathComponent(name, title, url), nil
+	return NewPathComponent(name, title, URL), nil
 }
 
 func (builder *Builder) relPath(absPath string) (string, error) {
