@@ -74,7 +74,10 @@ func renderPage(page *saturn.Page) (string, error) {
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		page, err := builder.Build(r.URL.Path)
+		path := r.URL.Path
+		log.Printf("Serving %v", path)
+
+		page, err := builder.Build(path)
 		if err != nil {
 			if os.IsNotExist(err) {
 				fmt.Fprint(w, "File not found")

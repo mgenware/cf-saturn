@@ -32,13 +32,23 @@ func NewBuilder(root string) (*Builder, error) {
 	}, nil
 }
 
-func (builder *Builder) Build(relPath string) (*Page, error) {
-	absPath, err := filepath.Abs(builder.absPath(relPath))
+func (builder *Builder) Build(path string) (*Page, error) {
+	if path == "" {
+		return nil, errors.New("Empty path")
+	}
+	if !strings.HasPrefix(path, "/") {
+		return nil, errors.New("Path must start with /")
+	}
+
+	// Strip the starting /
+	path = path[1:]
+
+	absPath, err := filepath.Abs(builder.absPath(path))
 	if err != nil {
 		return nil, err
 	}
 
-	relPath, err = builder.relPath(absPath)
+	relPath, err := builder.relPath(absPath)
 	if err != nil {
 		return nil, err
 	}
