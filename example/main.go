@@ -95,5 +95,8 @@ func main() {
 	})
 
 	log.Print(builder)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	port := ":8080"
+	log.Print("Server starting at " + port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
