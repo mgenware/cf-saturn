@@ -35,3 +35,7 @@ func JoinURL(a, b string) string {
 	}
 	return res
 }
+
+func NameWithoutExt(file string) string {
+	return strings.TrimSuffix(file, filepath.Ext(file))
+}
