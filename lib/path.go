@@ -16,11 +16,22 @@ func IsCurrentDirectory(path string) bool {
 }
 
 func FilePathToURL(path string) string {
+	if IsCurrentDirectory(path) {
+		return "/"
+	}
 	list := strings.Split(path, string(filepath.Separator))
 	var buffer bytes.Buffer
 	for _, item := range list {
 		buffer.WriteString("/")
-		buffer.WriteString(url.QueryEscape(item))
+		buffer.WriteString(url.PathEscape(item))
 	}
 	return buffer.String()
+}
+
+func JoinURL(a, b string) string {
+	res := strings.TrimRight(a, "/")
+	if b != "" {
+		res += "/" + strings.TrimLeft(b, "/")
+	}
+	return res
 }

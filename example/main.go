@@ -73,6 +73,7 @@ func renderPage(page *saturn.Page) (string, error) {
 }
 
 func main() {
+	// Define HTTP routers
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		log.Printf("Serving %v", path)
@@ -94,8 +95,8 @@ func main() {
 		fmt.Fprint(w, html)
 	})
 
+	// Start the server
 	log.Print(builder)
-
 	port := ":8080"
 	log.Print("Server starting at " + port)
 	log.Fatal(http.ListenAndServe(port, nil))

@@ -79,7 +79,7 @@ func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
 	}
 
 	name := filepath.Base(relFile)
-	siblings, err := builder.getChildEntries(filepath.Dir(relFile), filepath.Dir(absFile), name)
+	siblings, err := builder.getChildEntries(builder.getCurrentURL(paths, name), filepath.Dir(relFile), filepath.Dir(absFile), name)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,14 @@ func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
 	}
 
 	var paths []*PathComponent
-	if lib.IsCurrentDirectory(relDir) {
+	isRoot := lib.IsCurrentDirectory(relDir)
+
+	name := ""
+	if !isRoot {
+		name = filepath.Base(relDir)
+	}
+
+	if isRoot {
 		// Return an empty path array for root directory
 		paths = make([]*PathComponent, 0)
 	} else {
@@ -103,7 +110,7 @@ func (builder *Builder) buildDir(relDir, absDir string) (*Page, error) {
 			return nil, err
 		}
 	}
-	childComps, err := builder.getChildEntries(relDir, absDir, "")
+	childComps, err := builder.getChildEntries(builder.getCurrentURL(paths, name), relDir, absDir, "")
 
 	return NewPage(title, NewDirectoryContent(relDir, childComps), paths), nil
 }
@@ -121,6 +128,14 @@ func (builder *Builder) getParentPaths(relDir, absDir string) ([]*PathComponent,
 	}
 
 	return result, nil
+}
+
+func (builder *Builder) getCurrentURL(comps []*PathComponent, name string) string {
+	escapedName := url.PathEscape(name)
+	if len(comps) <= 0 {
+		return "/" + escapedName
+	}
+	return comps[len(comps)-1].URL + escapedName
 }
 
 func (builder *Builder) getParentPathsInternal(relDir, absDir string, walkCount int, list []*PathComponent) ([]*PathComponent, error) {
@@ -150,7 +165,7 @@ func (builder *Builder) getParentPathsInternal(relDir, absDir string, walkCount 
 	return builder.getParentPathsInternal(filepath.Dir(relDir), filepath.Dir(absDir), walkCount+1, result)
 }
 
-func (builder *Builder) getChildEntries(relDir, absDir string, exclude string) ([]*PathComponent, error) {
+func (builder *Builder) getChildEntries(parentURL, relDir, absDir string, exclude string) ([]*PathComponent, error) {
 	if lib.IsRelPathOutside(relDir) {
 		return nil, errors.New("Path is outside the root")
 	}
@@ -173,7 +188,7 @@ func (builder *Builder) getChildEntries(relDir, absDir string, exclude string) (
 			continue
 		}
 
-		comp, err := builder.getChildComponent(filepath.Join(relDir, name), filepath.Join(absDir, name))
+		comp, err := builder.getChildComponent(parentURL, filepath.Join(relDir, name), filepath.Join(absDir, name))
 		if err != nil {
 			return nil, err
 		}
@@ -183,7 +198,7 @@ func (builder *Builder) getChildEntries(relDir, absDir string, exclude string) (
 	return list, nil
 }
 
-func (builder *Builder) getChildComponent(relPath, absPath string) (*PathComponent, error) {
+func (builder *Builder) getChildComponent(parentURL, relPath, absPath string) (*PathComponent, error) {
 	isFile, err := iox.IsFile(absPath)
 	if err != nil {
 		return nil, err
@@ -191,7 +206,7 @@ func (builder *Builder) getChildComponent(relPath, absPath string) (*PathCompone
 
 	var URL, name, title string
 	name = filepath.Base(relPath)
-	URL = url.QueryEscape(name)
+	URL = lib.JoinURL(parentURL, url.PathEscape(name))
 	if isFile {
 		title, err = builder.mgr.TitleForFile(relPath, absPath)
 		if err != nil {

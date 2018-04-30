@@ -1,4 +1,0 @@
-# join
-> Quote
-
-> Another quote
