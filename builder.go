@@ -35,7 +35,7 @@ func NewBuilder(root string) (*Builder, error) {
 
 func (builder *Builder) Build(path string) (*Page, error) {
 	if path == "" {
-		return nil, errors.New("Empty path")
+		return nil, errors.New("Path must not be empty")
 	}
 	if !strings.HasPrefix(path, "/") {
 		return nil, errors.New("Path must start with /")
