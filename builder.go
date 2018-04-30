@@ -12,6 +12,10 @@ import (
 	"github.com/mgenware/go-packagex/iox"
 )
 
+var (
+	ErrPathNotFound = errors.New("The Path you requested does not exist")
+)
+
 type Builder struct {
 	RootDirectory string
 	MaxWalk       int
@@ -58,14 +62,15 @@ func (builder *Builder) Build(path string) (*Page, error) {
 		return nil, errors.New("Path is outside root")
 	}
 
-	isFile, err := iox.IsFile(absPath)
-	if err != nil {
-		return nil, err
+	if iox.IsDirectory(absPath) {
+		return builder.buildDir(relPath, absPath)
 	}
-	if isFile {
-		return builder.buildFile(relPath, absPath)
+
+	mdExt := lib.MarkdownFileExists(absPath)
+	if mdExt == "" {
+		return nil, ErrPathNotFound
 	}
-	return builder.buildDir(relPath, absPath)
+	return builder.buildFile(relPath+mdExt, absPath+mdExt)
 }
 
 func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
@@ -199,7 +204,7 @@ func (builder *Builder) getChildEntries(parentURL, relDir, absDir string, exclud
 }
 
 func (builder *Builder) getChildComponent(parentURL, relPath, absPath string) (*PathComponent, error) {
-	isFile, err := iox.IsFile(absPath)
+	isFile, err := iox.FileExists(absPath)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +237,7 @@ func (builder *Builder) absPath(relPath string) string {
 
 func (builder *Builder) isValidChild(parentPath, childName string) (bool, error) {
 	// Directories and .md files are considered valid children
-	isDir, err := iox.IsDirectory(filepath.Join(parentPath, childName))
+	isDir, err := iox.DirectoryExists(filepath.Join(parentPath, childName))
 	if err != nil {
 		return false, err
 	}
@@ -241,5 +246,5 @@ func (builder *Builder) isValidChild(parentPath, childName string) (bool, error)
 	}
 
 	ext := filepath.Ext(childName)
-	return strings.EqualFold(ext, ".md"), nil
+	return strings.EqualFold(ext, lib.MarkdownExtension), nil
 }

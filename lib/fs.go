@@ -4,17 +4,15 @@ import (
 	"bufio"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mgenware/go-packagex/iox"
 )
 
 const (
-	TTxt = "t.txt"
+	TTxt              = "t.txt"
+	MarkdownExtension = ".md"
 )
-
-func GetPathName(path string) string {
-	return filepath.Base(path)
-}
 
 func GetFirstLineOfFile(file string) (string, error) {
 	f, err := os.Open(file)
@@ -35,9 +33,18 @@ func GetFirstLineOfFile(file string) (string, error) {
 
 func GetFolderTitle(folder string) (string, error) {
 	txtPath := filepath.Join(folder, TTxt)
-	isFile, _ := iox.IsFile(txtPath)
-	if isFile {
+	if iox.IsFile(txtPath) {
 		return GetFirstLineOfFile(txtPath)
 	}
 	return "", nil
+}
+
+func MarkdownFileExists(file string) string {
+	if iox.IsFile(file + MarkdownExtension) {
+		return MarkdownExtension
+	}
+	if iox.IsFile(file + strings.ToUpper(MarkdownExtension)) {
+		return strings.ToUpper(MarkdownExtension)
+	}
+	return ""
 }
