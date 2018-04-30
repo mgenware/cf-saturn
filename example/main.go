@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"text/template"
 
 	"github.com/mgenware/go-packagex/templatex"
@@ -80,7 +79,7 @@ func main() {
 
 		page, err := builder.Build(path)
 		if err != nil {
-			if os.IsNotExist(err) {
+			if err == saturn.ErrPathNotFound {
 				fmt.Fprint(w, "File not found")
 				return
 			}
