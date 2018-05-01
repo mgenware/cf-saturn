@@ -11,7 +11,7 @@ import (
 var builder *tests.TBuilder
 
 func init() {
-	builder = tests.NewTBuilder("../tests")
+	builder = tests.NewTBuilder()
 }
 
 func main() {

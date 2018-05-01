@@ -7,37 +7,37 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"runtime"
 
 	"text/template"
 
 	"github.com/mgenware/go-packagex/templatex"
 )
 
+var _, exePath, _, _ = runtime.Caller(0)
+var workingDir = filepath.Dir(exePath)
+
 type PageData struct {
 	Title, ContentHTML, PathHTML string
 }
 
 type TBuilder struct {
-	WorkingDir string
-
 	builder          *saturn.Builder
 	pathCompTemplate *template.Template
 	pageTemplate     *template.Template
 }
 
-func NewTBuilder(wd string) *TBuilder {
-	b := &TBuilder{
-		WorkingDir: wd,
-	}
-
-	builder, err := saturn.NewBuilder(filepath.Join(wd, "data"))
+func NewTBuilder() *TBuilder {
+	b := &TBuilder{}
+	builder, err := saturn.NewBuilder(filepath.Join(workingDir, "data"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Load templates
-	pathCompTemplate := templatex.MustParseFromFile(filepath.Join(wd, "template/pathComp.html"))
-	pageTemplate := templatex.MustParseFromFile(filepath.Join(wd, "template/page.html"))
+	log.Printf("%v: %v", workingDir, filepath.Join(workingDir, "template/pathComp.html"))
+	pathCompTemplate := templatex.MustParseFromFile(filepath.Join(workingDir, "template/pathComp.html"))
+	pageTemplate := templatex.MustParseFromFile(filepath.Join(workingDir, "template/page.html"))
 
 	b.builder = builder
 	b.pathCompTemplate = pathCompTemplate
@@ -81,4 +81,16 @@ func (builder *TBuilder) RenderPage(page *saturn.Page) (string, error) {
 
 func (builder *TBuilder) Build(path string) (*saturn.Page, error) {
 	return builder.builder.Build(path)
+}
+
+func (builder *TBuilder) BuildHTMLOrPanic(path string) string {
+	page, err := builder.Build(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	html, err := builder.RenderPage(page)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return html
 }
