@@ -1,13 +1,14 @@
 package saturn
 
 import (
-	"cf-saturn/lib"
-	"cf-saturn/manager"
 	"errors"
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
 	"strings"
+
+	"github.com/mgenware/cf-saturn/lib"
+	"github.com/mgenware/cf-saturn/manager"
 
 	"github.com/mgenware/go-packagex/iox"
 )

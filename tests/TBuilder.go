@@ -2,12 +2,13 @@ package tests
 
 import (
 	"bytes"
-	saturn "cf-saturn"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
 	"runtime"
+
+	"github.com/mgenware/cf-saturn"
 
 	"text/template"
 

@@ -1,10 +1,11 @@
 package manager
 
 import (
-	"cf-saturn/lib"
-	"cf-saturn/lib/markdown"
 	"path/filepath"
 	"strings"
+
+	"github.com/mgenware/cf-saturn/lib"
+	"github.com/mgenware/cf-saturn/lib/markdown"
 
 	"github.com/mgenware/go-packagex/iox"
 )

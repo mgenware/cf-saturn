@@ -1,11 +1,12 @@
 package main
 
 import (
-	"cf-saturn"
-	"cf-saturn/tests"
 	"fmt"
 	"log"
 	"net/http"
+
+	saturn "github.com/mgenware/cf-saturn"
+	"github.com/mgenware/cf-saturn/tests"
 )
 
 var builder *tests.TBuilder
