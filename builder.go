@@ -139,7 +139,7 @@ func (builder *Builder) getParentPaths(relDir, absDir string) ([]*PathComponent,
 func (builder *Builder) getCurrentURL(comps []*PathComponent, suffix string) string {
 	escapedName := url.PathEscape(suffix)
 	if len(comps) <= 0 {
-		return "/" + escapedName
+		return lib.JoinURL(builder.PrefixURL, escapedName)
 	}
 	return lib.JoinURL(comps[len(comps)-1].URL, escapedName)
 }
@@ -162,7 +162,7 @@ func (builder *Builder) getParentPathsInternal(relDir, absDir string, walkCount 
 		return nil, err
 	}
 
-	pathComp := NewPathComponent(filepath.Base(relDir), title, lib.FilePathToURL(relDir))
+	pathComp := NewPathComponent(filepath.Base(relDir), title, lib.JoinURL(builder.PrefixURL, lib.FilePathToURL(relDir)))
 	result := append(list, pathComp)
 
 	if lib.IsCurrentDirectory(relDir) {

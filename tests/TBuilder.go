@@ -28,12 +28,13 @@ type TBuilder struct {
 	pageTemplate     *template.Template
 }
 
-func NewTBuilder() *TBuilder {
+func NewTBuilder(prefixURL string) *TBuilder {
 	b := &TBuilder{}
 	builder, err := saturn.NewBuilder(filepath.Join(workingDir, "data"))
 	if err != nil {
 		log.Fatal(err)
 	}
+	builder.PrefixURL = prefixURL
 
 	// Load templates
 	pathCompTemplate := templatex.MustParseFromFile(filepath.Join(workingDir, "template/pathComp.html"))

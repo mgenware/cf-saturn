@@ -9,9 +9,11 @@ import (
 )
 
 var defaultBuilder *TBuilder
+var urlPrefixBuilder *TBuilder
 
 func init() {
-	defaultBuilder = NewTBuilder()
+	defaultBuilder = NewTBuilder("")
+	urlPrefixBuilder = NewTBuilder("/sub1/sub2")
 }
 
 func testBuilder(t *testing.T, b *TBuilder, p string) {
