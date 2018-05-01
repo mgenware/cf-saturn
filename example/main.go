@@ -26,7 +26,6 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	b.PrefixURL = "/my-lib"
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -29,6 +29,12 @@ func FilePathToURL(path string) string {
 }
 
 func JoinURL(a, b string) string {
+	if a == "" {
+		return b
+	}
+	if b == "" {
+		return a
+	}
 	res := strings.TrimRight(a, "/")
 	if b != "" {
 		res += "/" + strings.TrimLeft(b, "/")
@@ -38,4 +44,8 @@ func JoinURL(a, b string) string {
 
 func NameWithoutExt(file string) string {
 	return strings.TrimSuffix(file, filepath.Ext(file))
+}
+
+func BaseWithoutExt(path string) string {
+	return NameWithoutExt(filepath.Base(path))
 }

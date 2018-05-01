@@ -84,7 +84,7 @@ func (builder *Builder) buildFile(relFile, absFile string) (*Page, error) {
 	}
 
 	name := filepath.Base(relFile)
-	siblings, err := builder.getChildEntries(builder.getCurrentURL(paths, name), filepath.Dir(relFile), filepath.Dir(absFile), name)
+	siblings, err := builder.getChildEntries(builder.getCurrentURL(paths, ""), filepath.Dir(relFile), filepath.Dir(absFile), name)
 	if err != nil {
 		return nil, err
 	}
@@ -135,12 +135,12 @@ func (builder *Builder) getParentPaths(relDir, absDir string) ([]*PathComponent,
 	return result, nil
 }
 
-func (builder *Builder) getCurrentURL(comps []*PathComponent, name string) string {
-	escapedName := url.PathEscape(name)
+func (builder *Builder) getCurrentURL(comps []*PathComponent, suffix string) string {
+	escapedName := url.PathEscape(suffix)
 	if len(comps) <= 0 {
 		return "/" + escapedName
 	}
-	return comps[len(comps)-1].URL + escapedName
+	return lib.JoinURL(comps[len(comps)-1].URL, escapedName)
 }
 
 func (builder *Builder) getParentPathsInternal(relDir, absDir string, walkCount int, list []*PathComponent) ([]*PathComponent, error) {
@@ -193,7 +193,7 @@ func (builder *Builder) getChildEntries(parentURL, relDir, absDir string, exclud
 			continue
 		}
 
-		comp, err := builder.getChildComponent(parentURL, filepath.Join(relDir, name), filepath.Join(absDir, name))
+		comp, err := builder.getPathComponent(parentURL, filepath.Join(relDir, name), filepath.Join(absDir, name))
 		if err != nil {
 			return nil, err
 		}
@@ -203,27 +203,28 @@ func (builder *Builder) getChildEntries(parentURL, relDir, absDir string, exclud
 	return list, nil
 }
 
-func (builder *Builder) getChildComponent(parentURL, relPath, absPath string) (*PathComponent, error) {
+func (builder *Builder) getPathComponent(parentURL, relPath, absPath string) (*PathComponent, error) {
 	isFile, err := iox.FileExists(absPath)
 	if err != nil {
 		return nil, err
 	}
 
-	var URL, name, title string
-	name = filepath.Base(relPath)
-	URL = lib.JoinURL(parentURL, url.PathEscape(name))
+	var name, title string
 	if isFile {
 		title, err = builder.mgr.TitleForFile(relPath, absPath)
 		if err != nil {
 			return nil, err
 		}
+		name = lib.BaseWithoutExt(relPath)
 	} else {
 		title, err = builder.mgr.TitleForDirectory(relPath, absPath)
 		if err != nil {
 			return nil, err
 		}
+		name = filepath.Base(relPath)
 	}
 
+	URL := lib.JoinURL(parentURL, url.PathEscape(name))
 	return NewPathComponent(name, title, URL), nil
 }
 
