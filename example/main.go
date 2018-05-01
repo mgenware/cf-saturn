@@ -1,73 +1,17 @@
 package main
 
 import (
-	"bytes"
 	"cf-saturn"
+	"cf-saturn/tests"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"text/template"
-
-	"github.com/mgenware/go-packagex/templatex"
 )
 
-type PageData struct {
-	Title, ContentHTML, PathHTML string
-}
-
-var builder *saturn.Builder
-var pathCompTemplate *template.Template
-var pageTemplate *template.Template
+var builder *tests.TBuilder
 
 func init() {
-	// Initialize builder
-	b, err := saturn.NewBuilder("./data")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	builder = b
-
-	// Load templates
-	pathCompTemplate = templatex.MustParseFromFile("./template/pathComp.html")
-	pageTemplate = templatex.MustParseFromFile("./template/page.html")
-}
-
-func renderComps(paths []*saturn.PathComponent, newline bool) string {
-	var buffer bytes.Buffer
-	for _, p := range paths {
-		if newline {
-			buffer.WriteString(fmt.Sprintf("<li>%v</li>", templatex.ExecuteToString(pathCompTemplate, p)))
-		} else {
-			buffer.WriteString(templatex.ExecuteToString(pathCompTemplate, p))
-			buffer.WriteString(": ")
-		}
-	}
-	return buffer.String()
-}
-
-func renderPage(page *saturn.Page) (string, error) {
-	pageData := &PageData{}
-	pageData.Title = page.Title
-	pageData.PathHTML = renderComps(page.Paths, false)
-
-	content := page.Content
-	if content.IsFile {
-		fileBytes, err := ioutil.ReadFile(content.Path)
-		pageData.ContentHTML = string(fileBytes) + "<hr/>" + renderComps(content.Siblings, true)
-		if err != nil {
-			return "", err
-		}
-	} else {
-		pageData.ContentHTML = renderComps(content.Children, true)
-	}
-
-	html := templatex.ExecuteToString(pageTemplate, pageData)
-	return html, nil
+	builder = tests.NewTBuilder("../tests")
 }
 
 func main() {
@@ -86,7 +30,7 @@ func main() {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		html, err := renderPage(page)
+		html, err := builder.RenderPage(page)
 		if err != nil {
 			log.Fatal(err)
 		}
