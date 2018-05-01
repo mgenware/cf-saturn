@@ -36,7 +36,6 @@ func NewTBuilder() *TBuilder {
 	}
 
 	// Load templates
-	log.Printf("%v: %v", workingDir, filepath.Join(workingDir, "template/pathComp.html"))
 	pathCompTemplate := templatex.MustParseFromFile(filepath.Join(workingDir, "template/pathComp.html"))
 	pageTemplate := templatex.MustParseFromFile(filepath.Join(workingDir, "template/page.html"))
 
