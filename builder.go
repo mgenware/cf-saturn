@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	ErrPathNotFound = errors.New("The Path you requested does not exist")
+	ErrPathNotFound = errors.New("The path you requested does not exist")
 )
 
 type Builder struct {
