@@ -37,8 +37,8 @@ func NewTBuilder(prefixURL string) *TBuilder {
 	builder.PrefixURL = prefixURL
 
 	// Load templates
-	pathCompTemplate := templatex.MustParseFromFile(filepath.Join(workingDir, "template/pathComp.html"))
-	pageTemplate := templatex.MustParseFromFile(filepath.Join(workingDir, "template/page.html"))
+	pathCompTemplate := templatex.MustParseFile(filepath.Join(workingDir, "template/pathComp.html"))
+	pageTemplate := templatex.MustParseFile(filepath.Join(workingDir, "template/page.html"))
 
 	b.builder = builder
 	b.pathCompTemplate = pathCompTemplate
@@ -51,9 +51,9 @@ func (builder *TBuilder) RenderComponents(paths []*saturn.PathComponent, newline
 	var buffer bytes.Buffer
 	for _, p := range paths {
 		if newline {
-			buffer.WriteString(fmt.Sprintf("<li>%v</li>", templatex.ExecuteToString(builder.pathCompTemplate, p)))
+			buffer.WriteString(fmt.Sprintf("<li>%v</li>", templatex.MustExecuteToString(builder.pathCompTemplate, p)))
 		} else {
-			buffer.WriteString(templatex.ExecuteToString(builder.pathCompTemplate, p))
+			buffer.WriteString(templatex.MustExecuteToString(builder.pathCompTemplate, p))
 			buffer.WriteString(": ")
 		}
 	}
@@ -76,7 +76,7 @@ func (builder *TBuilder) RenderPage(page *saturn.Page) (string, error) {
 		pageData.ContentHTML = builder.RenderComponents(content.Children, true)
 	}
 
-	html := templatex.ExecuteToString(builder.pageTemplate, pageData)
+	html := templatex.MustExecuteToString(builder.pageTemplate, pageData)
 	return html, nil
 }
 
