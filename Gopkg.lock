@@ -2,17 +2,22 @@
 
 
 [[projects]]
+  digest = "1:e64fa7746d05199c707cb00dd8d66fe45c573258b3321aadecf104ec4a244db5"
   name = "github.com/mgenware/go-packagex"
   packages = [
     "iox",
-    "templatex"
+    "templatex",
   ]
+  pruneopts = "UT"
   revision = "0bd67af9d9d10be29017ca25686f8d6af9713a69"
   version = "1.3.2"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6176cf78614eb9e27133ef304c9aaf3ef96c07481f201b977627f69d5278e5dd"
+  input-imports = [
+    "github.com/mgenware/go-packagex/iox",
+    "github.com/mgenware/go-packagex/templatex",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
