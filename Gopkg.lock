@@ -2,15 +2,15 @@
 
 
 [[projects]]
-  digest = "1:e64fa7746d05199c707cb00dd8d66fe45c573258b3321aadecf104ec4a244db5"
+  digest = "1:b6826b9a0f3e6141355c5f4264d4f5578bf0dc423b5d10b22b87be99f5073e5c"
   name = "github.com/mgenware/go-packagex"
   packages = [
     "iox",
     "templatex",
   ]
   pruneopts = "UT"
-  revision = "395c7b5037e381bca48fb3ac2b6d03163041495a"
-  version = "1.4.0"
+  revision = "3193769f2df7cea57232ead1c6ae88f1760f8dd5"
+  version = "2.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
