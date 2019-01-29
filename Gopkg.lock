@@ -9,8 +9,8 @@
     "templatex",
   ]
   pruneopts = "UT"
-  revision = "3193769f2df7cea57232ead1c6ae88f1760f8dd5"
-  version = "2.0.0"
+  revision = "f1bdbc477db7ec6fcf67654c2a96d6457296b9ea"
+  version = "3.0.1"
 
 [solve-meta]
   analyzer-name = "dep"
