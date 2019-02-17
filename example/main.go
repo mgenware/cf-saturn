@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	saturn "github.com/mgenware/cf-saturn"
-	"github.com/mgenware/cf-saturn/tests"
+	saturn "github.com/mgenware/cf-saturn/v2"
+	"github.com/mgenware/cf-saturn/v2/tests"
 )
 
 var builder *tests.TBuilder

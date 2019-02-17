@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/mgenware/cf-saturn"
+	saturn "github.com/mgenware/cf-saturn/v2"
 
 	"text/template"
 

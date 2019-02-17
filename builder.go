@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mgenware/cf-saturn/lib"
-	"github.com/mgenware/cf-saturn/manager"
+	"github.com/mgenware/cf-saturn/v2/lib"
+	"github.com/mgenware/cf-saturn/v2/manager"
 
 	"github.com/mgenware/go-packagex/iox"
 )

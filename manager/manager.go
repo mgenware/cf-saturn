@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mgenware/cf-saturn/lib"
-	"github.com/mgenware/cf-saturn/lib/markdown"
+	"github.com/mgenware/cf-saturn/v2/lib"
+	"github.com/mgenware/cf-saturn/v2/lib/markdown"
 
 	"github.com/mgenware/go-packagex/iox"
 )
